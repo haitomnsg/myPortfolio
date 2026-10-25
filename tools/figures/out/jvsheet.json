@@ -1,0 +1,6 @@
+[
+  ["wait", 400],
+  ["sheet", "tools/figures/out/shots/jv-sheet.png", 120, 8, ".iso-svg", 0.7],
+  ["eval", "new Promise(r => { let n = 0; const t0 = performance.now(); const f = () => { n++; if (performance.now() - t0 < 2000) requestAnimationFrame(f); else r(n / 2); }; requestAnimationFrame(f); })"],
+  ["eval", "(() => { const p = __jv.parts; const t0 = performance.now(); for (let i = 0; i < 20; i++) { p.terrain(800 + i * 5); for (const leg of __jv.M.LEGS) p.leg(leg, __jv.M.legIK(leg, [...__jv.M.homeOf(leg), -100])); } return (performance.now() - t0) / 20; })()"]
+]

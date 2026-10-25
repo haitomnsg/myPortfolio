@@ -1,0 +1,9 @@
+[
+  ["wait", 3500],
+  ["eval", "(() => { const s = document.querySelector('.robotics'); window.scrollTo(0, s.getBoundingClientRect().top + scrollY - innerHeight * 0.55); return 1; })()"],
+  ["wait", 2000],
+  ["shot", "tools/figures/out/shots/ring-seam.png", "main", 0.6, [0, 1000, 1440, 900]],
+  ["eval", "(() => { document.querySelector('a[data-chapter-link=\"robotics\"]').click(); return 1; })()"],
+  ["wait", 2500],
+  ["eval", "[Math.round(document.querySelector('.robotics__track').getBoundingClientRect().top), document.documentElement.classList.contains('on-dark')]"]
+]

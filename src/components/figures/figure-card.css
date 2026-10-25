@@ -1,0 +1,29 @@
+/* The card an Anatomy figure sits in: paper, a hairline navy edge, mono corners (Fig, title, hint,
+   live readout). Its final look comes from the Robotics mockup; this is the working version. */
+.fig-card {
+  position: relative;
+  margin: 0;
+  padding: clamp(36px, 4.2vw, 56px) clamp(12px, 2vw, 28px);
+  border-radius: 28px;
+  background: var(--c-paper);
+  box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.12), 0 18px 40px -24px rgb(30 87 143 / 0.35);
+  color: var(--c-ink);
+}
+.fig-card__corners span {
+  position: absolute;
+  font: 500 12px/1 var(--f-mono);
+  letter-spacing: 0.04em;
+  color: var(--c-muted);
+}
+.fig-card__corners [data-corner="fig"] { top: 20px; left: 24px; color: var(--c-ink); }
+.fig-card__corners [data-corner="title"] { top: 20px; right: 24px; }
+.fig-card__corners [data-corner="hint"] { bottom: 20px; left: 24px; }
+.fig-card__corners [data-corner="readout"] { bottom: 20px; right: 24px; color: var(--c-sky-deep); font-variant-numeric: tabular-nums; }
+.fig-card__stage { width: 100%; touch-action: pan-y; border-radius: 12px; }
+.fig-card__stage > svg { display: block; width: 100%; height: auto; }
+.fig-card__stage:focus-visible { outline: 1px solid var(--c-muted); outline-offset: 6px; }
+@media (max-width: 560px) {
+  .fig-card { border-radius: 20px; }
+  .fig-card__corners [data-corner="hint"] { bottom: 14px; left: 18px; }
+  .fig-card__corners [data-corner="readout"] { bottom: 14px; right: 18px; }
+}

@@ -1,0 +1,5 @@
+[
+  ["wait", 800],
+  ["eval", "(() => { const a = document.querySelector('[data-behind]'); const b = document.querySelector('[data-front]'); const sa = a.innerHTML, sb = b.innerHTML; const t0 = performance.now(); for (let i = 0; i < 20; i++) { a.innerHTML = sa; b.innerHTML = sb; a.getBBox(); } return [(performance.now() - t0) / 20, sa.length + sb.length, document.querySelectorAll('svg *').length]; })()"],
+  ["eval", "new Promise(r => { const ts = []; let last = performance.now(); const f = (t) => { ts.push(t - last); last = t; if (ts.length < 90) requestAnimationFrame(f); else { ts.sort((x, y) => x - y); r([ts[45], ts[80]]); } }; requestAnimationFrame(f); })"]
+]

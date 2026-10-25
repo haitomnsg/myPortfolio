@@ -1,0 +1,4 @@
+[
+  ["wait", 1300],
+  ["shot", "tools/figures/out/shots/jv-one.png", ".iso-svg", 2.2, [160, 60, 330, 230]]
+]

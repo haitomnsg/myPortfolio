@@ -1,0 +1,7 @@
+[
+  ["eval", "window.__stop = true"],
+  ["wait", 300],
+  ["shot", "tools/figures/out/shots/z-arm.png", ".iso-svg", 5, [255, 130, 110, 110]],
+  ["shot", "tools/figures/out/shots/z-wheel.png", ".iso-svg", 5, [130, 250, 120, 110]],
+  ["shot", "tools/figures/out/shots/z-deck.png", ".iso-svg", 4, [230, 230, 150, 110]]
+]

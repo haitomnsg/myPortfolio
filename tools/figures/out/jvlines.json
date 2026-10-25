@@ -1,0 +1,9 @@
+[
+  ["wait", 300],
+  ["lines", "tools/figures/out/shots/jv-lines-a.png", ".iso-svg"],
+  ["wait", 1700],
+  ["lines", "tools/figures/out/shots/jv-lines-b.png", ".iso-svg"],
+  ["wait", 2300],
+  ["lines", "tools/figures/out/shots/jv-lines-c.png", ".iso-svg"],
+  ["shot", "tools/figures/out/shots/jv-c.png", ".iso-svg", 1.6]
+]

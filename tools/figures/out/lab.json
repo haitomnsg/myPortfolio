@@ -1,0 +1,9 @@
+[
+  ["wait", 9000],
+  ["eval", "[...document.querySelectorAll('[data-corner=readout]')].map((e) => e.textContent)"],
+  ["scroll", ".fig-card:nth-of-type(2)"],
+  ["wait", 4000],
+  ["eval", "[...document.querySelectorAll('[data-corner=readout]')].map((e) => e.textContent)"],
+  ["eval", "new Promise(r => { let n = 0; const t0 = performance.now(); const f = () => { n++; if (performance.now() - t0 < 2000) requestAnimationFrame(f); else r(n / 2); }; requestAnimationFrame(f); })"],
+  ["shot", "tools/figures/out/shots/lab-jeevi.png", ".fig-card:nth-of-type(2)", 1]
+]

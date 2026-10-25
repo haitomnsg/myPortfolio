@@ -1,0 +1,14 @@
+[
+  ["wait", 500],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('picking')", 15000],
+  ["wait", 1800],
+  ["lines", "tools/figures/out/shots/lines-reach.png", ".iso-svg"],
+  ["shot", "tools/figures/out/shots/reach.png", ".iso-svg", 3, [330, 120, 160, 120]],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('into the cup')", 15000],
+  ["wait", 900],
+  ["lines", "tools/figures/out/shots/lines-carry.png", ".iso-svg"],
+  ["until", "document.querySelector('[data-readout]').textContent.startsWith('in the cup')", 15000],
+  ["wait", 1200],
+  ["lines", "tools/figures/out/shots/lines-home.png", ".iso-svg"],
+  ["sheet", "tools/figures/out/shots/sheet.png", 700, 12, ".iso-svg", 0.6]
+]

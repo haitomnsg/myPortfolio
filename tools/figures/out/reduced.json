@@ -1,0 +1,13 @@
+[
+  ["wait", 2500],
+  ["eval", "document.querySelector('[data-readout]').textContent"],
+  ["key", "ArrowRight"],
+  ["wait", 400],
+  ["eval", "document.querySelector('[data-readout]').textContent"],
+  ["key", "Enter"],
+  ["wait", 1500],
+  ["eval", "document.querySelector('[data-readout]').textContent"],
+  ["wait", 2500],
+  ["eval", "document.querySelector('[data-readout]').textContent"],
+  ["shot", "tools/figures/out/shots/reduced.png", ".iso-svg", 1]
+]

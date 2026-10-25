@@ -1,0 +1,81 @@
+/* Anatomy's light theme retinted to the site: paper faces, navy ink lines, cool blue-grey shading.
+   Apricot is the signal: ripe fruit and the camera's focus marks only. */
+.iso[data-theme="light"] .tb-figure,
+.iso[data-theme="light"].tb-figure,
+.tb-figure {
+  --anatomy-paper: #f5f8fb;
+  --anatomy-face: #ffffff;
+  --anatomy-top: #fbfcfe;
+  --anatomy-shade-0: #d6dfea;
+  --anatomy-shade-1: #e0e7f0;
+  --anatomy-shade-2: #e9eef5;
+  --anatomy-shade-3: #f1f5f9;
+  --anatomy-lit-top: #ffffff;
+  --anatomy-lit-shade: #eaf0f6;
+  --anatomy-hi: #1f2a3a;
+  --anatomy-mid: #6f7e94;
+  --anatomy-lo: #a6b2c3;
+  --anatomy-faint: #cad3df;
+  --anatomy-lit: #0b1322;
+  --anatomy-halo: #5d7594;
+  --anatomy-halo-opacity: 0.26;
+  --anatomy-dot: #2a3546;
+  --tb-signal: #ff8f4d;
+}
+
+/* the robot's black parts: anodised slate rather than ink, so the drawing stays calm */
+.tb-figure .mat-dark {
+  --anatomy-paper: #c3cedb;
+  --anatomy-face: #d3dce6;
+  --anatomy-top: #d0d9e4;
+  --anatomy-shade-0: #a5b3c4;
+  --anatomy-shade-1: #b0bdcc;
+  --anatomy-shade-2: #bac6d3;
+  --anatomy-shade-3: #c5cfdb;
+  --anatomy-mid: #4f5e74;
+  --anatomy-lo: #7d8ba0;
+  --anatomy-faint: #9ba8b9;
+}
+
+.tb-figure .mat-leaf {
+  --anatomy-paper: #eef3f8;
+  --anatomy-shade-0: #d2dce8;
+  --anatomy-shade-1: #dae3ed;
+  --anatomy-shade-2: #e3eaf2;
+  --anatomy-shade-3: #ecf1f6;
+}
+
+.tb-figure .mat-soil .iso-fill,
+.tb-figure .mat-soil .iso-top { fill: #d9e1eb; }
+.tb-figure .cup-void { fill: #c9d3df; stroke: none; }
+
+/* tomatoes: ripe ones in the signal colour, unripe ones stay paper */
+.tb-figure .fruit[data-ripe="1"] {
+  --anatomy-paper: #ffb27f;
+  --anatomy-shade-0: #f07a36;
+  --anatomy-shade-1: #f88a45;
+  --anatomy-shade-2: #fd9a58;
+  --anatomy-shade-3: #ffab70;
+  --anatomy-mid: #b4541f;
+}
+.tb-figure .fruit[data-ripe="0"] {
+  --anatomy-shade-0: #d9e2ec;
+  --anatomy-shade-1: #e2e9f1;
+  --anatomy-shade-2: #ebf0f6;
+  --anatomy-shade-3: #f4f7fa;
+}
+
+.tb-figure .sight-line { fill: none; stroke: var(--tb-signal); stroke-width: 0.6; stroke-dasharray: 1.6 2.2; opacity: 0.7; }
+.tb-figure .sight-mark { fill: none; stroke: var(--tb-signal); stroke-width: 1.1; stroke-linecap: round; }
+
+/* the cup: a painted can (a mid slate) with a paper label on its front */
+.tb-figure .cup-label { fill: #f7f9fc; stroke: none; }
+.tb-figure .mat-cup {
+  --anatomy-paper: #c9d4e0;
+  --anatomy-top: #d4dde7;
+  --anatomy-shade-0: #aebccd;
+  --anatomy-shade-1: #b9c5d4;
+  --anatomy-shade-2: #c3cedb;
+  --anatomy-shade-3: #ccd6e1;
+}
+.tb-figure .sight-mark[data-locked] { stroke-width: 1.3; }

@@ -1,0 +1,8 @@
+ink	Current: paper arm on ink
+sky	Ink arm on the hero sky blue
+sky-fade	Hero sky, pale at the top and deeper at the floor
+mist	Ink arm on the palest blue
+paper	Ink arm on paper with a sky-blue edge
+apricot	Ink arm on apricot, sky-blue tip
+sky-arm	Sky-blue arm on ink, apricot tip
+adaptive	No tile: ink arm in light tabs, paper arm in dark tabs

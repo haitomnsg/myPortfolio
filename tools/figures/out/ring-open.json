@@ -1,0 +1,14 @@
+[
+  ["wait", 3500],
+  ["eval", "(() => { const t = document.querySelector('.robotics__track'); window.scrollTo(0, t.getBoundingClientRect().top + scrollY); return 1; })()"],
+  ["wait", 2500],
+  ["click", ".robotics__openBtn"],
+  ["wait", 400],
+  ["shot", "tools/figures/out/shots/ring-open-a.png", ".robotics__stage", 1],
+  ["wait", 4500],
+  ["eval", "[document.querySelector('.robotics__open') ? 'open' : 'closed', document.querySelector('.robotics__frame .fig-card') ? 'live figure' : 'still only']"],
+  ["shot", "tools/figures/out/shots/ring-open-b.png", ".robotics__stage", 1],
+  ["key", "Escape", ".robotics__frame"],
+  ["wait", 1200],
+  ["eval", "document.querySelector('.robotics__open') ? 'still open' : 'closed'"]
+]

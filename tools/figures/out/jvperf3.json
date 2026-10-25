@@ -1,0 +1,4 @@
+[
+  ["wait", 600],
+  ["eval", "new Promise(r => { const p = __jv.parts; const acc = {}; for (const name of ['leg', 'terrain', 'beltLines']) { const f = p[name]; p[name] = (...a) => { const t0 = performance.now(); const out = f(...a); acc[name] = (acc[name] || 0) + performance.now() - t0; return out; }; } const raf = window.requestAnimationFrame.bind(window); let n = 0, total = 0; window.requestAnimationFrame = (cb) => raf((t) => { const t0 = performance.now(); cb(t); total += performance.now() - t0; n++; }); setTimeout(() => { const o = { frames: n, total: (total / n).toFixed(2) }; for (const [k2, v] of Object.entries(acc)) o[k2] = (v / n).toFixed(2); r(o); }, 2500); })"]
+]

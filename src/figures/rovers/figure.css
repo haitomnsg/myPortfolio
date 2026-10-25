@@ -1,0 +1,83 @@
+/* Figs 3–5: the same retint as Figs 1–2 (paper faces, navy lines, cool shading). The rovers' black
+   and printed parts are slate; their yellow wheels and gear motors are a warm paper, the only warmth
+   besides the apricot signal, which marks only what the robot is sensing. */
+.iso[data-theme="light"] .rv-figure,
+.iso[data-theme="light"].rv-figure,
+.rv-figure {
+  --anatomy-paper: #f5f8fb;
+  --anatomy-face: #ffffff;
+  --anatomy-top: #fbfcfe;
+  --anatomy-shade-0: #d6dfea;
+  --anatomy-shade-1: #e0e7f0;
+  --anatomy-shade-2: #e9eef5;
+  --anatomy-shade-3: #f1f5f9;
+  --anatomy-lit-top: #ffffff;
+  --anatomy-lit-shade: #eaf0f6;
+  --anatomy-hi: #1f2a3a;
+  --anatomy-mid: #6f7e94;
+  --anatomy-lo: #a6b2c3;
+  --anatomy-faint: #cad3df;
+  --anatomy-lit: #0b1322;
+  --anatomy-halo: #5d7594;
+  --anatomy-halo-opacity: 0.26;
+  --anatomy-dot: #2a3546;
+  --rv-signal: #ff8f4d;
+}
+.rv-figure .mat-dark, .rv-figure .mat-rubber {
+  --anatomy-paper: #c3cedb;
+  --anatomy-face: #d3dce6;
+  --anatomy-top: #d0d9e4;
+  --anatomy-shade-0: #a5b3c4;
+  --anatomy-shade-1: #b0bdcc;
+  --anatomy-shade-2: #bac6d3;
+  --anatomy-shade-3: #c5cfdb;
+  --anatomy-mid: #4f5e74;
+  --anatomy-lo: #7d8ba0;
+  --anatomy-faint: #9ba8b9;
+}
+.rv-figure .mat-rubber { --anatomy-paper: #b7c3d1; --anatomy-shade-0: #98a7ba; --anatomy-shade-1: #a3b1c2; --anatomy-shade-2: #aebbca; --anatomy-shade-3: #b9c5d2; }
+/* yellow plastic (gear motors, hubs, mecanum wheels): a warm paper */
+.rv-figure .mat-yellow {
+  --anatomy-paper: #f6ecd9;
+  --anatomy-top: #fbf4e6;
+  --anatomy-shade-0: #e4d3b4;
+  --anatomy-shade-1: #ebdcc1;
+  --anatomy-shade-2: #f0e4cd;
+  --anatomy-shade-3: #f5ead7;
+  --anatomy-lo: #c7b28c;
+  --anatomy-faint: #dccaa6;
+}
+/* circuit boards and screw terminals: blues of the palette */
+.rv-figure .mat-pcb {
+  --anatomy-paper: #d4e2f1;
+  --anatomy-top: #dde9f5;
+  --anatomy-shade-0: #b9cce2;
+  --anatomy-shade-1: #c3d4e7;
+  --anatomy-shade-2: #ccdbec;
+  --anatomy-shade-3: #d5e2f0;
+}
+.rv-figure .mat-blue {
+  --anatomy-paper: #b9d0ea;
+  --anatomy-top: #c7daef;
+  --anatomy-shade-0: #9ab8dc;
+  --anatomy-shade-1: #a5c1e1;
+  --anatomy-shade-2: #b0c9e6;
+  --anatomy-shade-3: #bbd1ea;
+}
+.rv-figure .mat-cell { --anatomy-paper: #e8eef5; --anatomy-shade-0: #cbd6e3; --anatomy-shade-1: #d4dee9; --anatomy-shade-2: #dde5ee; --anatomy-shade-3: #e6ecf3; }
+.rv-figure .mat-wood {
+  --anatomy-paper: #c9d1db;
+  --anatomy-top: #d2d9e2;
+  --anatomy-shade-0: #aab5c3;
+  --anatomy-shade-1: #b4bfcb;
+  --anatomy-shade-2: #bec7d2;
+  --anatomy-shade-3: #c8d0da;
+  --anatomy-faint: #aeb8c6;
+}
+/* what the robot senses */
+.rv-figure .sight-line { fill: none; stroke: var(--rv-signal); stroke-width: 0.6; stroke-dasharray: 1.6 2.2; opacity: 0.7; }
+.rv-figure .sight-mark { fill: none; stroke: var(--rv-signal); stroke-width: 1.2; stroke-linecap: round; }
+.rv-figure .sonar { fill: rgb(255 143 77 / 0.12); stroke: var(--rv-signal); stroke-width: 0.7; stroke-linejoin: round; }
+.rv-figure .sonar-arc { fill: none; stroke: var(--rv-signal); stroke-width: 0.6; opacity: 0.65; }
+.rv-figure .sonar[data-clear] { fill: rgb(255 143 77 / 0.06); stroke-opacity: 0.35; }
+.rv-figure .rv-blur { fill: var(--anatomy-shade-1); stroke: var(--anatomy-lo); stroke-width: 0.4; }

@@ -1,0 +1,12 @@
+[
+  ["wait", 800],
+  ["eval", "document.querySelector('[data-readout]').textContent"],
+  ["key", "3"],
+  ["wait", 300],
+  ["eval", "document.querySelector('[data-readout]').textContent"],
+  ["lines", "tools/figures/out/shots/jv-lines-red.png", ".iso-svg"],
+  ["shot", "tools/figures/out/shots/jv-red.png", ".iso-svg", 1.2],
+  ["key", "1"],
+  ["wait", 300],
+  ["eval", "document.querySelector('[data-readout]').textContent"]
+]

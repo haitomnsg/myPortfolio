@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "logo-designer": {
+      "source": "luongnv89/skills",
+      "sourceType": "github",
+      "skillPath": "skills/logo-designer/SKILL.md",
+      "computedHash": "eb3591c396b77e66a67b4967e8471f9c15db523fea65223cde679d7d534de3a0"
+    }
+  }
+}

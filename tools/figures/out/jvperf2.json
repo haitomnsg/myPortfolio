@@ -1,0 +1,4 @@
+[
+  ["wait", 600],
+  ["eval", "new Promise(r => { const raf = window.requestAnimationFrame.bind(window); const script = []; const gaps = []; let last = 0; window.requestAnimationFrame = (cb) => raf((t) => { if (last) gaps.push(t - last); last = t; const t0 = performance.now(); cb(t); script.push(performance.now() - t0); }); setTimeout(() => { const m = (a) => { a.sort((x, y) => x - y); return a[Math.floor(a.length / 2)].toFixed(1); }; r({ script: m(script), frame: m(gaps), n: script.length, html: document.querySelector('[data-behind]').innerHTML.length + document.querySelector('[data-front]').innerHTML.length }); }, 2500); })"]
+]

@@ -1,0 +1,7 @@
+[
+  ["wait", 3500],
+  ["eval", "(() => { document.querySelector('a[data-chapter-link=\"robotics\"]').click(); return 1; })()"],
+  ["wait", 2200],
+  ["eval", "Math.round(document.querySelector('.robotics__track').getBoundingClientRect().top)"],
+  ["eval", "new Promise(r => { const t = document.querySelector('.robotics__track'); const y0 = scrollY; const run = t.offsetHeight - innerHeight; let n = 0; const t0 = performance.now(); const f = () => { const k = (performance.now() - t0) / 3000; window.scrollTo(0, y0 + run * Math.min(1, k)); n++; if (k < 1) requestAnimationFrame(f); else r([n / 3, document.querySelector('.robotics__nowName').textContent]); }; requestAnimationFrame(f); })"]
+]

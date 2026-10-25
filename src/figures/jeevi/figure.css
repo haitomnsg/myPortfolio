@@ -1,0 +1,63 @@
+/* Anatomy's light theme retinted to the site (the same tokens as Fig 1). Printed parts are paper,
+   servos and the belt are slate, the TPU socks are the lit part. */
+.iso[data-theme="light"] .jv-figure,
+.iso[data-theme="light"].jv-figure,
+.jv-figure {
+  --anatomy-paper: #f5f8fb;
+  --anatomy-face: #ffffff;
+  --anatomy-top: #fbfcfe;
+  --anatomy-shade-0: #d6dfea;
+  --anatomy-shade-1: #e0e7f0;
+  --anatomy-shade-2: #e9eef5;
+  --anatomy-shade-3: #f1f5f9;
+  --anatomy-lit-top: #ffffff;
+  --anatomy-lit-shade: #eaf0f6;
+  --anatomy-hi: #1f2a3a;
+  --anatomy-mid: #6f7e94;
+  --anatomy-lo: #a6b2c3;
+  --anatomy-faint: #cad3df;
+  --anatomy-lit: #0b1322;
+  --anatomy-halo: #5d7594;
+  --anatomy-halo-opacity: 0.26;
+  --anatomy-dot: #2a3546;
+  --jv-signal: #ff8f4d;
+}
+.jv-figure .mat-dark {
+  --anatomy-paper: #c3cedb;
+  --anatomy-face: #d3dce6;
+  --anatomy-top: #d0d9e4;
+  --anatomy-shade-0: #a5b3c4;
+  --anatomy-shade-1: #b0bdcc;
+  --anatomy-shade-2: #bac6d3;
+  --anatomy-shade-3: #c5cfdb;
+  --anatomy-mid: #4f5e74;
+  --anatomy-lo: #7d8ba0;
+  --anatomy-faint: #9ba8b9;
+}
+/* the dark inside the hoods and under the belt */
+.jv-figure .mat-cavity {
+  --anatomy-paper: #8796ab;
+  --anatomy-top: #93a1b4;
+  --anatomy-shade-0: #7f8ea4;
+  --anatomy-shade-1: #8696ab;
+  --anatomy-shade-2: #8e9db1;
+  --anatomy-shade-3: #95a3b6;
+}
+/* terrain blocks: a cool paper, a step lighter than the belt */
+.jv-figure .mat-terrain {
+  --anatomy-paper: #eef3f8;
+  --anatomy-top: #f7f9fc;
+  --anatomy-shade-0: #cfd9e6;
+  --anatomy-shade-1: #d9e2ec;
+  --anatomy-shade-2: #e2e9f1;
+  --anatomy-shade-3: #ebf0f6;
+}
+/* TPU socks */
+.jv-figure .mat-tpu {
+  --anatomy-face: #f9fbfd;
+  --anatomy-lit-top: #ffffff;
+  --anatomy-lit-shade: #dde5ef;
+}
+.jv-figure .jv-belt { stroke: #8b99ad; }
+/* the chosen terrain's button carries the signal */
+.jv-figure .tb-button[data-on] { --anatomy-top: #ffd2b3; --anatomy-shade-3: #ffc49c; --anatomy-shade-2: #ffb889; --anatomy-shade-1: #ffad78; --anatomy-shade-0: #ffa066; --anatomy-paper: #ffc49c; }

@@ -1,0 +1,5 @@
+[
+  ["until", "document.querySelector('[data-readout]').textContent.includes('picking')", 15000],
+  ["wait", 1200],
+  ["shot", "inspo/robotics/attach-2-tomatobot-figure.png", ".iso-plate", 2]
+]

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<style>
+.m{animation:focus 4.8s cubic-bezier(.2,.7,.2,1) infinite}
+.br{transform-origin:32px 32px;animation:lock 4.8s cubic-bezier(.3,1.4,.4,1) infinite}
+.d{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 4.8s cubic-bezier(.65,0,.35,1) infinite}
+.a{animation-delay:.25s}
+.dot{transform-origin:32px 18px;animation:af 4.8s ease-out infinite}
+@keyframes focus{0%{filter:blur(3px);opacity:.2}22%,100%{filter:blur(0);opacity:1}}
+@keyframes lock{0%{transform:scale(1.35);opacity:0}20%{transform:scale(1);opacity:.45}90%{opacity:.45}100%{opacity:0}}
+@keyframes draw{8%{stroke-dashoffset:1}38%,90%{stroke-dashoffset:0}100%{stroke-dashoffset:-1}}
+@keyframes af{0%,36%{transform:scale(0)}42%{transform:scale(1.7)}48%,90%{transform:scale(1)}100%{transform:scale(0)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;stroke-dashoffset:0!important}.br{opacity:.45}}
+</style>
+<g class="m" fill="none" stroke="#121a26" stroke-linecap="round" stroke-linejoin="round">
+<path class="br" d="M6 14 V6 H14 M50 6 H58 V14 M58 50 V58 H50 M14 58 H6 V50" stroke-width="2"/>
+<path class="d" pathLength="1" d="M46.14 17.86 A20 20 0 1 0 52 32 L27 32" stroke-width="4.5"/>
+<path class="d a" pathLength="1" d="M22 46 L32 18 L42 46" stroke-width="4.5"/>
+</g>
+<circle class="dot" cx="32" cy="18" r="3.2" fill="#ff8f4d"/>
+</svg>

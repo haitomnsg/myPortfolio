@@ -1,0 +1,25 @@
+wrote out/tomatobot.html 724 KB items 284
+clearance: 0 problems
+clearance apart: 0 problems
+terminals: 9 ends not on a mount
+  plant0.petiole1 end  -0.15 from plant0.leaf1.u1 (rim -0.10…0.45)   at [-55.3, -92.5, 47.5]
+  plant0.petiole3 end  -0.15 from plant0.leaf3.u1 (rim -0.10…0.45)   at [-58.2, -92.5, 75.5]
+  plant0.petiole5 end  -0.15 from plant0.leaf5.u1 (rim -0.10…0.45)   at [-54.8, -92.5, 131.5]
+  plant1.petiole1 end  -0.15 from plant1.leaf1.u1 (rim -0.10…0.45)   at [13.8, -92.5, 47.5]
+  plant1.petiole3 end  -0.15 from plant1.leaf3.u1 (rim -0.10…0.45)   at [16.1, -92.5, 89.5]
+  plant1.petiole5 end  -0.15 from plant1.leaf5.u1 (rim -0.10…0.45)   at [16.1, -92.5, 131.5]
+  plant2.petiole1 end  -0.15 from plant2.leaf1.u1 (rim -0.10…0.45)   at [86.6, -92.5, 47.5]
+  plant2.petiole3 end  -0.15 from plant2.leaf3.u1 (rim -0.10…0.45)   at [89.3, -92.5, 75.5]
+  plant2.petiole5 end  -0.15 from plant2.leaf5.u1 (rim -0.10…0.45)   at [85.5, -92.5, 131.5]
+loose ends: 0
+screen folds: 0
+support: 0 unsupported solids · 0 hanging tubes · 0 sunk pairs
+depth order: 0 problems
+through in mid-flight: 0 pairs
+self-overlap: 0 chunks whose outline crosses itself on screen
+wobble: 0 smoothed profiles whose slope turns between its ends
+saddles off their host apart: 0
+stand-in shapes: 0 items whose recorded shape covers too little of what it draws
+crowding: 0 pairs where a bend or end touches another line on screen
+audit · 54 tubes · 205 solids · 284 items · 1 depth states · 568 overlaps · 568 order rules · 4.3 s
+audit failed: 9 problems

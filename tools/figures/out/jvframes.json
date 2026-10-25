@@ -1,0 +1,6 @@
+[
+  ["wait", 500],
+  ["eval", "new Promise(r => { let n = 0; const t0 = performance.now(); const f = () => { n++; if (performance.now() - t0 < 2000) requestAnimationFrame(f); else r(n / 2); }; requestAnimationFrame(f); })"],
+  ["slow", 0.1],
+  ["sheet", "tools/figures/out/shots/jv-slow.png", 900, 6, ".iso-svg", 1, [120, 40, 420, 300]]
+]

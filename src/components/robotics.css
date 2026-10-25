@@ -1,0 +1,206 @@
+/* ============================================================
+   01 Robotics: the focus ring (Robotics.tsx)
+   ============================================================ */
+.robotics {
+  --c-sky-mid: #3f78bd; /* the blue half of the line: 4.4:1 on mist */
+  --head-top: clamp(88px, 10.5svh, 104px); /* just under the header's pills, which stay put */
+  position: relative;
+  color: var(--c-ink);
+  background: var(--c-field-hi);
+}
+.robotics__track { position: relative; height: calc(100svh + var(--steps) * var(--step) * 100svh); }
+.robotics__stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  /* the hero's floor carries on into the stage's top and clears into mist behind the heading */
+  background:
+    radial-gradient(70% 30% at 0% 0%, rgb(46 82 138 / 0.5), rgb(46 82 138 / 0.22) 45%, rgb(46 82 138 / 0) 80%),
+    radial-gradient(60% 55% at 50% 72%, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0) 70%),
+    linear-gradient(180deg, #6790c6 0%, #8db2de 9%, #bcd5ef 19%, var(--c-field-hi) 32%, #eef4fa 62%, var(--c-paper) 100%);
+}
+
+.robotics__head { position: absolute; z-index: 2; left: var(--margin); top: var(--head-top); transition: opacity 0.5s var(--out); }
+.robotics__index {
+  position: relative;
+  padding: 0.9em 0 0 1.35em;
+  font: 500 13px/1 var(--f-mono);
+  letter-spacing: 0.02em;
+  color: var(--c-sky-deep);
+}
+.robotics__bracket { position: absolute; left: 0; top: 0; width: 2.4em; height: 2.4em; border: 0 solid currentColor; border-width: 1.5px 0 0 1.5px; }
+.robotics__title {
+  margin: 0.08em 0 0 -0.05em;
+  font-family: var(--f-display);
+  font-size: clamp(68px, 9vw, 164px);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.045em;
+}
+.robotics__line { margin-top: 0.16em; font-size: clamp(24px, 2.6vw, 44px); font-weight: 300; line-height: 1.04; letter-spacing: -0.03em; }
+.robotics__line em { font-style: normal; color: var(--c-sky-mid); }
+
+/* the robot in front, top right */
+.robotics__now {
+  position: absolute;
+  z-index: 2;
+  right: var(--margin);
+  top: calc(var(--head-top) + 34px);
+  display: grid;
+  width: min(28vw, 360px);
+  transition: opacity 0.4s var(--out);
+}
+/* every robot's text stacks in one cell, so the panel keeps the tallest one's height as the wheel turns */
+.robotics__nowItem { grid-area: 1 / 1; opacity: 0; visibility: hidden; translate: 0 10px; transition: opacity 0.3s var(--out), translate 0.5s var(--out), visibility 0s 0.3s; }
+.robotics__nowItem[data-active] { opacity: 1; visibility: visible; translate: 0 0; transition-delay: 0.05s, 0.05s, 0s; }
+@keyframes robot-now { from { opacity: 0; translate: 0 10px; } }
+.robotics__nowIndex { font: 500 12px/1 var(--f-mono); letter-spacing: 0.04em; color: var(--c-sky-deep); }
+.robotics__nowName { margin-top: 10px; font-family: var(--f-display); font-size: clamp(22px, 1.9vw, 30px); font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+.robotics__nowLine { margin-top: 8px; font-size: clamp(14px, 1vw, 16px); line-height: 1.5; color: rgb(18 26 38 / 0.78); }
+.robotics__specs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; padding: 0; list-style: none; }
+.robotics__specs li::before, .robotics__specs li::after { content: none; }
+.robotics__specs li { padding: 6px 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.14); font: 500 11.5px/1 var(--f-mono); letter-spacing: 0.02em; color: rgb(18 26 38 / 0.72); }
+.robotics__openBtn, .robotics__back {
+  margin-top: 18px;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  font: 500 13px/1 var(--f-body);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.3s var(--out), translate 0.3s var(--out);
+}
+.robotics__openBtn:hover, .robotics__back:hover { background: var(--c-sky-deep); translate: 0 -1px; }
+
+/* the wheel: cards placed by script on a wide circle below the stage */
+.robotics__ring { position: absolute; inset: 0; z-index: 1; perspective: 2200px; perspective-origin: 50% 30%; pointer-events: none; transition: opacity 0.5s var(--out), filter 0.5s var(--out); }
+.robotics__item { display: contents; }
+.robotics__rim { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.robotics__rim path { fill: none; stroke: #b7cde6; stroke-width: 1; }
+.robotics__rim circle { fill: var(--c-paper); stroke: #9db8d8; stroke-width: 1; transition: fill 0.3s, stroke 0.3s; }
+.robotics__rim circle[data-front] { fill: var(--c-sky-deep); stroke: var(--c-sky-deep); }
+.rcard {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--card-w, clamp(240px, 22vw, 400px)); /* set by the wheel to fit the height left */
+  padding: 10px 10px 16px;
+  border: 0;
+  border-radius: 26px;
+  background: var(--c-paper);
+  color: inherit;
+  box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.07), 0 2px 4px rgb(30 87 143 / 0.05), 0 30px 60px -32px rgb(30 87 143 / 0.42);
+  transform-origin: 50% 0;
+  filter: blur(var(--blur, 0px));
+  cursor: pointer;
+  pointer-events: auto;
+  will-change: transform, filter;
+  transition: box-shadow 0.4s var(--out);
+}
+.rcard:hover { box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.1), 0 2px 4px rgb(30 87 143 / 0.06), 0 40px 70px -30px rgb(30 87 143 / 0.5); }
+.rcard:focus-visible { outline: 2px solid var(--c-sky-deep); outline-offset: 4px; }
+.rcard__img { position: relative; display: block; aspect-ratio: 1.28; overflow: hidden; border-radius: 18px; background: var(--c-paper); }
+.rcard__img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.rcard__cap { display: block; margin-top: 12px; text-align: center; font: 500 clamp(13px, 1vw, 17px)/1 var(--f-mono); letter-spacing: 0.02em; color: var(--c-sky-deep); }
+.rcard__cap span { margin-right: 0.5em; }
+.rcard__line { display: none; }
+/* the hero's focus corners lock on the robot in front */
+.rcard__af { position: absolute; inset: 8px; opacity: var(--focus, 0); scale: calc(1.05 - var(--focus, 0) * 0.05); pointer-events: none; }
+.rcard__af i { position: absolute; width: 26px; height: 26px; border: 0 solid var(--c-signal); }
+.rcard__af i:nth-child(1) { left: 0; top: 0; border-width: 2px 0 0 2px; border-top-left-radius: 6px; }
+.rcard__af i:nth-child(2) { right: 0; top: 0; border-width: 2px 2px 0 0; border-top-right-radius: 6px; }
+.rcard__af i:nth-child(3) { left: 0; bottom: 0; border-width: 0 0 2px 2px; border-bottom-left-radius: 6px; }
+.rcard__af i:nth-child(4) { right: 0; bottom: 0; border-width: 0 2px 2px 0; border-bottom-right-radius: 6px; }
+
+/* open: the chosen robot fills the stage, the wheel waits behind */
+.robotics[data-open] .robotics__head,
+.robotics[data-open] .robotics__now { opacity: 0; pointer-events: none; }
+.robotics[data-open] .robotics__ring { opacity: 0.22; filter: blur(8px); pointer-events: none; }
+.robotics__open {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  gap: clamp(24px, 4vw, 72px);
+  align-items: center;
+  padding: clamp(92px, 12svh, 132px) var(--margin) clamp(28px, 5svh, 56px);
+}
+.robotics__openText { animation: robot-now 0.7s 0.15s var(--out) both; }
+.robotics__openName { margin-top: 14px; font-family: var(--f-display); font-size: clamp(44px, 5.2vw, 96px); font-weight: 800; line-height: 0.9; letter-spacing: -0.045em; }
+.robotics__openLine { margin-top: 18px; max-width: 34ch; font-size: clamp(17px, 1.3vw, 21px); line-height: 1.45; color: rgb(18 26 38 / 0.8); }
+.robotics__stat { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; font: 500 12px/1.2 var(--f-mono); letter-spacing: 0.03em; color: var(--c-sky-deep); }
+.robotics__stat span { font: 300 clamp(56px, 6vw, 104px)/0.9 var(--f-body); letter-spacing: -0.04em; color: var(--c-ink); font-variant-numeric: tabular-nums; }
+.robotics__chip { display: inline-block; margin-top: 18px; padding: 8px 12px; border-radius: 999px; background: rgb(255 255 255 / 0.8); box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.1); font: 500 12px/1 var(--f-mono); }
+.robotics__back { display: block; margin-top: 28px; }
+.robotics__frame {
+  position: relative;
+  aspect-ratio: 1.2;
+  max-height: calc(100svh - clamp(120px, 17svh, 188px));
+  justify-self: end;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 28px;
+  background: var(--c-paper);
+  box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.08), 0 40px 90px -40px rgb(30 87 143 / 0.5);
+  outline: none;
+}
+.robotics__still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.robotics__live.fig-card { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; border-radius: inherit; box-shadow: none; animation: robot-live 0.5s var(--out) both; }
+@keyframes robot-live { from { opacity: 0; } }
+.robotics__close {
+  position: absolute;
+  z-index: 3;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.12);
+  color: var(--c-ink);
+  font: 300 24px/1 var(--f-body);
+  cursor: pointer;
+}
+.robotics__close:hover { background: var(--c-ink); color: var(--c-paper); }
+/* the live figure's title corner steps left of the close button */
+.robotics__live .fig-card__corners [data-corner='title'] { right: 72px; }
+
+/* phones and reduced motion: a row you swipe, no pinning */
+.robotics[data-mode='row'] .robotics__track { height: auto; }
+.robotics[data-mode='row'] .robotics__stage { position: relative; height: auto; overflow: visible; padding: clamp(64px, 12svh, 104px) 0 clamp(56px, 9svh, 96px); background-size: 100% max(100%, 100svh); background-repeat: no-repeat; }
+.robotics[data-mode='row'] .robotics__head { position: relative; left: auto; top: auto; padding: 0 var(--margin); }
+.robotics[data-mode='row'] .robotics__ring {
+  position: relative;
+  inset: auto;
+  display: flex;
+  gap: 14px;
+  margin-top: 28px;
+  padding: 6px var(--margin) 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 var(--margin);
+  perspective: none;
+  pointer-events: auto;
+  scrollbar-width: none;
+}
+.robotics[data-mode='row'] .robotics__ring::-webkit-scrollbar { display: none; }
+.robotics[data-mode='row'] .robotics__item { display: block; flex: 0 0 min(82vw, 420px); scroll-snap-align: start; }
+.robotics[data-mode='row'] .rcard { position: relative; width: 100%; height: 100%; filter: none; text-align: left; }
+.robotics[data-mode='row'] .rcard__cap { text-align: left; padding: 0 6px; }
+.robotics[data-mode='row'] .rcard__line { display: block; margin-top: 8px; padding: 0 6px; font-size: 15px; line-height: 1.45; color: rgb(18 26 38 / 0.75); }
+.robotics[data-mode='row'] .robotics__open {
+  position: fixed;
+  z-index: 60;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  overflow-y: auto;
+  padding: 84px var(--margin) 40px;
+  background: var(--c-field-hi);
+}
+.robotics[data-mode='row'] .robotics__open .robotics__frame { order: -1; justify-self: stretch; }
+.robotics[data-mode='row'][data-open] .robotics__ring { opacity: 1; filter: none; }

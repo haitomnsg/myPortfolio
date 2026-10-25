@@ -1,0 +1,10 @@
+[
+  ["wait", 4000],
+  ["eval", "(() => { const t = document.querySelector('.robotics__track'); window.scrollTo(0, t.getBoundingClientRect().top + scrollY); return t.offsetHeight; })()"],
+  ["wait", 2500],
+  ["shot", "tools/figures/out/shots/ring-1.png", ".robotics__stage", 1],
+  ["eval", "(() => { const t = document.querySelector('.robotics__track'); window.scrollTo(0, t.getBoundingClientRect().top + scrollY + (t.offsetHeight - innerHeight) * 0.25); return document.querySelector('.robotics__nowName')?.textContent; })()"],
+  ["wait", 2500],
+  ["eval", "document.querySelector('.robotics__nowName')?.textContent"],
+  ["shot", "tools/figures/out/shots/ring-2.png", ".robotics__stage", 1]
+]

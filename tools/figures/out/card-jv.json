@@ -1,0 +1,5 @@
+[
+  ["until", "document.querySelector('[data-readout]').textContent.startsWith('rough ·')", 15000],
+  ["wait", 1300],
+  ["shot", "tools/figures/out/cards/jeevi.png", ".iso-svg", 2]
+]
