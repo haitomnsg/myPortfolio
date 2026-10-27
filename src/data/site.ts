@@ -99,21 +99,6 @@ export const chapters: Chapter[] = [
       { name: 'WadaConnect', text: 'Registration and document requests for ward offices.' },
     ],
   },
-  {
-    // built from PROFILE facts until Ashish sends the design works he wants here
-    id: 'design',
-    n: 4,
-    title: 'Design',
-    line: 'Screens, marks and photographs.',
-    image: '/chapters/design.webp',
-    imageAlt: 'Jiffy app screens: a menu of burgers and pizza, and a meal recommender, in orange and white.',
-    items: [
-      { name: 'Jiffy', text: 'A food-delivery Android app, redesigned: Gemini picks the meal, AR shows the menu, plus games and shorts. Second place at the JIFFY Hackathon.' },
-      { name: 'AG monogram', text: 'The mark on this site: a geometric line, drawn as one stroke.' },
-      { name: 'Photography', text: 'Outdoor Nepal in natural light: lakes, terraced hills, Himalayan skylines.' },
-      { name: 'Tools', text: 'Figma, Canva and Lightroom.' },
-    ],
-  },
 ];
 
 /** Chapter 01, the focus ring: every robot, in the order the ring shows them (docs/PROFILE.md §3, §9). */
@@ -121,7 +106,6 @@ export type Robot = {
   id: string;
   name: string;
   line: string;
-  specs: string[];
   stat?: { value: string; label: string };
   chip?: string;
   image: string;
@@ -140,7 +124,6 @@ export const robots: Robot[] = [
     id: 'jeevi',
     name: 'JeevI',
     line: 'A 3D-printable quadruped with 12 joints. Its gait was trained with PPO in NVIDIA Isaac Lab and converged on three terrains.',
-    specs: ['12 DOF', 'PPO', 'Isaac Lab'],
     stat: { value: '256.27', label: 'reward on flat terrain' },
     image: '/robots/jeevi.webp',
     imageAlt: 'Drawing of JeevI, a four-legged printed robot, trotting on a treadmill over rough terrain.',
@@ -150,7 +133,6 @@ export const robots: Robot[] = [
     id: 'tomatobot',
     name: 'TomatoBot v2',
     line: 'Finds the ripe tomatoes with YOLOv11 and picks them with a 6-DOF arm.',
-    specs: ['YOLOv11', '6-DOF arm', 'Raspberry Pi'],
     stat: { value: '88%', label: 'ripeness detection, in the field' },
     chip: 'Published · IJICTDC 2026',
     image: '/robots/tomatobot.webp',
@@ -161,7 +143,6 @@ export const robots: Robot[] = [
     id: 'rescue-vehicle',
     name: 'Rescue vehicle',
     line: 'An Arduino rover with an arm, a drone, fire suppression and a camera.',
-    specs: ['Arduino', 'arm', 'drone'],
     image: '/robots/rescue-vehicle.webp',
     imageAlt: 'Drawing of the rescue vehicle: a cabin on eight small wheels, a drone lifting off its roof and a robotic arm unfolded behind.',
     figure: 'rescue',
@@ -170,7 +151,6 @@ export const robots: Robot[] = [
     id: 'face-tracker',
     name: 'Face tracker',
     line: 'Follows a person, or traffic signs, with an MU vision sensor on an Arduino.',
-    specs: ['Arduino', 'MU vision sensor', 'mecanum wheels'],
     image: '/robots/face-tracker.webp',
     imageAlt: 'Drawing of the face tracker on a bench: a rover on four mecanum wheels keeping a traffic sign centred in front of its vision sensor.',
     figure: 'face-tracker',
@@ -179,7 +159,6 @@ export const robots: Robot[] = [
     id: 'obstacle-car',
     name: 'Obstacle car',
     line: 'Looks left and right with an ultrasonic sensor, then takes the clearer side. Early work.',
-    specs: ['Arduino', 'ultrasonic sensor', 'servo'],
     image: '/robots/obstacle-car.webp',
     imageAlt: 'Drawing of the obstacle car on a stand, its ultrasonic sensor on a small servo sounding a wall in front of it.',
     figure: 'obstacle-car',

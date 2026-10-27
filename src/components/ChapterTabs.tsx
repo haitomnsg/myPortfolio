@@ -7,7 +7,7 @@ import { chapters as all } from '@/data/site';
 const chapters = all.filter((c) => c.id !== 'robotics' && c.id !== 'ai');
 import { ease, prefersReducedMotion, scrollToTarget } from '@/engine';
 
-/** Four tall pills (the chapter index) and the panel they control. The chosen pill comes into focus. */
+/** Tall pills (the chapter index) and the panel they control. The chosen pill comes into focus. */
 export function ChapterTabs() {
   const [sel, setSel] = useState(0);
   const panel = useRef<HTMLDivElement>(null);

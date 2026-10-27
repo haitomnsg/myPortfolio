@@ -12,7 +12,8 @@ import './robotics.css';
 
 // Chapter 01, the focus ring (docs/ROBOTICS_MOCKUP_PROMPT.md): the robots stand on an arch, a half
 // circle of cards that each lean along it. Scroll turns it one robot at a time, with a pause on each;
-// the robot at the top wears the hero's focus corners and its text sits inside the arch. Click a
+// the robot at the top wears the hero's focus corners and its text sits inside the arch, the heading
+// stands on the right, away from the logo. Click a
 // robot and it comes to the top and opens; the open view runs its live figure.
 
 const N = robots.length;
@@ -36,6 +37,7 @@ export function Robotics() {
   const track = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLElement>(null);
+  const nowRef = useRef<HTMLDivElement>(null);
   const cards = useRef<(HTMLButtonElement | null)[]>([]);
   const frame = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<Mode>('ring');
@@ -90,22 +92,36 @@ export function Robotics() {
       if (!st) return;
       const w = st.clientWidth;
       const h = st.clientHeight;
-      const cw = Math.round(Math.max(220, Math.min(360, 0.2 * w, 0.4 * h)));
-      st.style.setProperty('--card-w', `${cw}px`);
-      const ch = cards.current[0]?.offsetHeight ?? cw;
-      const R = (cw + 18) / ARC;
-      // the top card clears the header and the arch's outer edge clears the heading's corner; the
-      // cards at either side sit low, partly out of the stage
-      const out = Math.hypot(R + ch / 2, cw / 2) + 16;
       const head = headRef.current;
-      const hx = head ? w / 2 - (head.offsetLeft + head.offsetWidth) : out;
-      const clear = head && hx < out ? head.offsetTop + head.offsetHeight + Math.sqrt(out * out - hx * hx) : 0;
-      const cy = Math.max(h * 0.8, 112 + ch / 2 + R, clear);
+      // the top card clears the header and the arch's outer edge clears the heading's inner corner;
+      // the cards at either side sit low, partly out of the stage. The robot's text sits inside the
+      // arch, as wide as the arch's opening, so its height is read back for each size tried
+      const arch = (cw: number, ch: number) => {
+        const R = (cw + 18) / ARC;
+        const out = Math.hypot(R + ch / 2, cw / 2) + 16;
+        const hx = head ? Math.max(head.offsetLeft - w / 2, w / 2 - head.offsetLeft - head.offsetWidth) : out;
+        const clear = head && hx < out ? head.offsetTop + head.offsetHeight + Math.sqrt(out * out - hx * hx) : 0;
+        st.style.setProperty('--arch-in', `${(R - ch / 2).toFixed(1)}px`);
+        return { R, cy: Math.max(h * 0.8, 112 + ch / 2 + R, clear), nh: nowRef.current?.offsetHeight ?? 0 };
+      };
+      let cw = Math.round(Math.max(220, Math.min(360, 0.2 * w, 0.4 * h)));
+      st.style.setProperty('--card-w', `${cw}px`);
+      let ch = cards.current[0]?.offsetHeight ?? cw;
+      let g = arch(cw, ch);
+      // short screens: the cards shrink until the text and its button fit between the top card and the
+      // stage's foot (a card's height follows its width through the image's 1.12 aspect)
+      const fits = () => g.cy - g.R + ch / 2 + 24 + g.nh <= h - 40;
+      if (!fits()) {
+        while (cw > 200 && !fits()) { cw -= 4; ch -= 4 / 1.12; g = arch(cw, ch); }
+        st.style.setProperty('--card-w', `${cw}px`);
+        ch = cards.current[0]?.offsetHeight ?? ch;
+        g = arch(cw, ch);
+      }
+      const { R, cy, nh } = g;
       Object.assign(geo, { cx: w / 2, cy, R, cw, ch });
-      // the robot's text sits inside the arch, under the top card
       st.style.setProperty('--arch-x', `${(w / 2).toFixed(1)}px`);
-      st.style.setProperty('--arch-y', `${cy.toFixed(1)}px`);
-      st.style.setProperty('--arch-in', `${(R - ch / 2).toFixed(1)}px`);
+      const ny = Math.max(cy - R + ch / 2 + 24 + nh / 2, Math.min(cy - (R - ch / 2) * 0.4, h - 40 - nh / 2));
+      st.style.setProperty('--now-y', `${ny.toFixed(1)}px`);
     };
     const place = () => {
       const { cx, cy, R, cw, ch } = geo;
@@ -141,7 +157,10 @@ export function Robotics() {
     place();
     const onResize = () => { measure(); place(); };
     addEventListener('resize', onResize);
-    return () => { io.disconnect(); cancelAnimationFrame(raf); removeEventListener('resize', onResize); };
+    // the text panel settles its height once the fonts land
+    const ro = new ResizeObserver(onResize);
+    if (nowRef.current) ro.observe(nowRef.current);
+    return () => { io.disconnect(); ro.disconnect(); cancelAnimationFrame(raf); removeEventListener('resize', onResize); };
     // `close` only reads refs; it is stable enough for the loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, open, rawAt]);
@@ -212,22 +231,24 @@ export function Robotics() {
       <div className="robotics__track" ref={track} id="robotics">
       <div className="robotics__stage" ref={stage}>
         <header className="robotics__head" ref={headRef}>
-          <p className="robotics__index"><span className="robotics__bracket" aria-hidden="true" />01 / 04</p>
+          <p className="robotics__index"><span className="robotics__bracket" aria-hidden="true" />01 / 03</p>
           <h2 id="robotics-title" className="robotics__title">{robotics.title}</h2>
           <p className="robotics__line">{robotics.line[0]} <em>{robotics.line[1]}</em></p>
         </header>
 
         {mode === 'ring' && (
-          <div className="robotics__now" aria-live="polite">
+          <div className="robotics__now" ref={nowRef} aria-live="polite">
             {robots.map((r, i) => (
               <div key={r.id} className="robotics__nowItem" data-active={i === front ? '' : undefined} aria-hidden={i !== front} inert={i !== front}>
                 <p className="robotics__nowIndex">{two(i)} / {two(N - 1)}</p>
                 <p className="robotics__nowName">{r.name}</p>
                 <p className="robotics__nowLine">{r.line}</p>
-                <ul className="robotics__specs" aria-label="Built with">
-                  {r.specs.map((s) => <li key={s}>{s}</li>)}
-                </ul>
-                <button type="button" className="robotics__openBtn" onClick={() => choose(i)}>Open {r.name}<span aria-hidden="true"> ↗</span></button>
+                <button type="button" className="robotics__openBtn" onClick={() => choose(i)}>
+                  Open {r.name}
+                  <span className="robotics__openArrow" aria-hidden="true">
+                    <svg viewBox="0 0 12 12" width="12" height="12"><path d="M3 9 9 3M4 3h5v5" /></svg>
+                  </span>
+                </button>
               </div>
             ))}
           </div>
@@ -266,9 +287,6 @@ export function Robotics() {
                 <p className="robotics__stat"><span>{shownRobot.stat.value}</span>{shownRobot.stat.label}</p>
               )}
               {shownRobot.chip && <p className="robotics__chip">{shownRobot.chip}</p>}
-              <ul className="robotics__specs" aria-label="Built with">
-                {shownRobot.specs.map((s) => <li key={s}>{s}</li>)}
-              </ul>
               <button type="button" className="robotics__back" onClick={close}><span aria-hidden="true">← </span>Back to the robots</button>
             </div>
             <div className="robotics__frame" ref={frame} tabIndex={-1}>

@@ -21,17 +21,18 @@
     linear-gradient(180deg, #6790c6 0%, #8db2de 9%, #bcd5ef 19%, var(--c-field-hi) 32%, #eef4fa 62%, var(--c-paper) 100%);
 }
 
-.robotics__head { position: absolute; z-index: 2; left: var(--margin); top: var(--head-top); transition: opacity 0.5s var(--out); }
+/* the heading stands on the right margin line, clear of the logo; its bracket turns to the right corner */
+.robotics__head { position: absolute; z-index: 2; right: var(--margin); top: var(--head-top); text-align: right; transition: opacity 0.5s var(--out); }
 .robotics__index {
   position: relative;
-  padding: 0.9em 0 0 1.35em;
+  padding: 0.9em 1.35em 0 0;
   font: 500 13px/1 var(--f-mono);
   letter-spacing: 0.02em;
   color: var(--c-sky-deep);
 }
-.robotics__bracket { position: absolute; left: 0; top: 0; width: 2.4em; height: 2.4em; border: 0 solid currentColor; border-width: 1.5px 0 0 1.5px; }
+.robotics__bracket { position: absolute; right: 0; top: 0; width: 2.4em; height: 2.4em; border: 0 solid currentColor; border-width: 1.5px 1.5px 0 0; }
 .robotics__title {
-  margin: 0.08em 0 0 -0.05em;
+  margin: 0.08em 0.04em 0 0; /* the tracking trails past the s: this puts its ink on the margin line */
   font-family: var(--f-display);
   font-size: clamp(56px, 6vw, 112px);
   font-weight: 800;
@@ -41,19 +42,18 @@
 .robotics__line { margin-top: 0.2em; font-size: clamp(20px, 1.75vw, 30px); font-weight: 300; line-height: 1.04; letter-spacing: -0.03em; }
 .robotics__line em { font-style: normal; color: var(--c-sky-mid); }
 
-/* the robot at the top of the arch, its text inside the arch (Robotics.tsx sets the --arch-* vars) */
+/* the robot at the top of the arch, its text inside the arch (Robotics.tsx sets --arch-* and --now-y) */
 .robotics__now {
   position: absolute;
   z-index: 2;
   left: var(--arch-x, 50%);
-  top: calc(var(--arch-y, 80%) - var(--arch-in, 280px) * 0.4);
+  top: var(--now-y, 62%);
   translate: -50% -50%;
   display: grid;
   width: min(340px, calc(var(--arch-in, 280px) * 1.25));
   text-align: center;
   transition: opacity 0.4s var(--out);
 }
-.robotics__now .robotics__specs { justify-content: center; }
 /* every robot's text stacks in one cell, so the panel keeps the tallest one's height as the wheel turns */
 .robotics__nowItem { grid-area: 1 / 1; opacity: 0; visibility: hidden; translate: 0 10px; transition: opacity 0.3s var(--out), translate 0.5s var(--out), visibility 0s 0.3s; }
 .robotics__nowItem[data-active] { opacity: 1; visibility: visible; translate: 0 0; transition-delay: 0.05s, 0.05s, 0s; }
@@ -61,9 +61,6 @@
 .robotics__nowIndex { font: 500 12px/1 var(--f-mono); letter-spacing: 0.04em; color: var(--c-sky-deep); }
 .robotics__nowName { margin-top: 10px; font-family: var(--f-display); font-size: clamp(22px, 1.9vw, 30px); font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
 .robotics__nowLine { margin-top: 8px; font-size: clamp(14px, 1vw, 16px); line-height: 1.5; color: rgb(18 26 38 / 0.78); }
-.robotics__specs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; padding: 0; list-style: none; }
-.robotics__specs li::before, .robotics__specs li::after { content: none; }
-.robotics__specs li { padding: 6px 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.14); font: 500 11.5px/1 var(--f-mono); letter-spacing: 0.02em; color: rgb(18 26 38 / 0.72); }
 .robotics__openBtn, .robotics__back {
   margin-top: 18px;
   padding: 11px 16px;
@@ -74,9 +71,24 @@
   font: 500 13px/1 var(--f-body);
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition: background 0.3s var(--out), translate 0.3s var(--out);
+  transition: background 0.3s var(--out), translate 0.3s var(--out), box-shadow 0.3s var(--out);
 }
 .robotics__openBtn:hover, .robotics__back:hover { background: var(--c-sky-deep); translate: 0 -1px; }
+/* the robot's one call to action: a full-size pill with the hero's apricot on its arrow */
+.robotics__openBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 6px 6px 6px 22px;
+  font: 600 15px/1 var(--f-body);
+  box-shadow: 0 1px 2px rgb(18 26 38 / 0.2), 0 16px 32px -14px rgb(18 26 38 / 0.6);
+}
+.robotics__openBtn:hover { box-shadow: 0 1px 2px rgb(18 26 38 / 0.2), 0 20px 36px -14px rgb(30 87 143 / 0.7); }
+.robotics__openBtn:focus-visible { outline: 2px solid var(--c-sky-deep); outline-offset: 3px; }
+.robotics__openArrow { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--c-signal); color: var(--c-ink); transition: rotate 0.4s var(--out); }
+.robotics__openArrow svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.robotics__openBtn:hover .robotics__openArrow { rotate: 45deg; }
 
 /* the arch: cards placed by script on a half circle, each leaning along it */
 .robotics__ring { position: absolute; inset: 0; z-index: 1; pointer-events: none; transition: opacity 0.5s var(--out), filter 0.5s var(--out); }
@@ -171,7 +183,10 @@
 /* phones and reduced motion: a row you swipe, no pinning */
 .robotics[data-mode='row'] .robotics__track { height: auto; }
 .robotics[data-mode='row'] .robotics__stage { position: relative; height: auto; overflow: visible; padding: clamp(64px, 12svh, 104px) 0 clamp(56px, 9svh, 96px); background-size: 100% max(100%, 100svh); background-repeat: no-repeat; }
-.robotics[data-mode='row'] .robotics__head { position: relative; left: auto; top: auto; padding: 0 var(--margin); }
+.robotics[data-mode='row'] .robotics__head { position: relative; right: auto; top: auto; padding: 0 var(--margin); text-align: left; }
+.robotics[data-mode='row'] .robotics__index { padding: 0.9em 0 0 1.35em; }
+.robotics[data-mode='row'] .robotics__bracket { right: auto; left: 0; border-width: 1.5px 0 0 1.5px; }
+.robotics[data-mode='row'] .robotics__title { margin: 0.08em 0 0 -0.05em; }
 .robotics[data-mode='row'] .robotics__ring {
   position: relative;
   inset: auto;

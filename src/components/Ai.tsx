@@ -201,7 +201,7 @@ export function Ai() {
       onKeyDown={onKey}
     >
       <header className="ai__head">
-        <p className="ai__index"><span className="ai__bracket" aria-hidden="true" />02 / 04</p>
+        <p className="ai__index"><span className="ai__bracket" aria-hidden="true" />02 / 03</p>
         <h2 id="ai-title" className="ai__title">{ai.title}</h2>
         <p className="ai__line">{ai.line[0]} <em>{ai.line[1]}</em></p>
       </header>

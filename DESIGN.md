@@ -392,6 +392,20 @@ in front: index, name, one line from `robots` in `src/data/site.ts`, its specs a
   of the work."). The header turns paper only over `[data-dark]` sections now, so it stays ink over the
   light ring. The header's Robotics pill lands where the wheel pins.
 
+## 6e. Robotics pass 2 (2026-10-27)
+
+- **Design is out.** Ashish dropped the Design chapter: three chapters now, Robotics · AI · Software
+  (indexes 01 / 03 and 02 / 03). The chapter tabs below keep only Software until it gets its own section.
+- **Heading on the right.** The left was crowded under the logo, so "01 / 03 · Robotics · Machines that
+  move on their own." stands on the right margin line, its bracket on the right corner and the title's
+  ink (not its box) on the line. Phones keep it on the left, in the flow.
+- **No spec pills.** Each robot shows its index, name and one line; the open view keeps the stat and the
+  publication chip but loses the pills too (`specs` is gone from `robots`).
+- **Open button.** A full-size ink pill (15px) with the apricot arrow disc, so it reads as the one action.
+- **Never clipped.** The panel's place is measured: under the top card and at least 40px above the
+  stage's foot. On short screens (a 1366 × 768 laptop in a browser) the cards shrink, down to 200px,
+  until the panel and its button fit.
+
 ## 7. Open questions for Ashish
 
 1. Hero line: "I build robots that see, and software people use." Alternatives: "Robots that
