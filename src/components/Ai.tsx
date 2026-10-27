@@ -1,16 +1,16 @@
 'use client';
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as RPointerEvent } from 'react';
 import { gsap } from 'gsap';
-import { HUD } from '@/data/focus';
 import { ai, frames } from '@/data/site';
 import { ease, scrollState } from '@/engine';
 import { FrameVisual } from './figures/AiVisuals';
 import './ai.css';
 
-// Chapter 02, the contact sheet (docs/SHOWCASE_CONCEPTS.md §4): every AI project is a frame on one
-// roll of film, in time order. The film runs on its own once the section is on screen; scrolling
-// nudges it along. A loupe sits in the middle, and the frame under it is sharp and a little larger.
-// Hover holds the film and brings the loupe to the frame under the pointer; click prints the frame.
+// Chapter 02, the reel (docs/SHOWCASE_CONCEPTS.md §4): every AI project is a frame on one roll of
+// film, in time order. The whole strip runs, holes, frames and edge print together, on its own once
+// the section is on screen; scrolling nudges it along. The frame at the middle of the screen is lit,
+// the rest sit darker. Hover holds the film and lights the frame under the pointer; click prints it.
+// The frames are sized from the band's height, so the section fills one screen exactly.
 
 const N = frames.length;
 const COPIES = 4; // the roll repeats, so it never runs out
@@ -20,20 +20,20 @@ const smooth = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 const two = (n: number) => String(n + 1).padStart(2, '0');
-const years = `${frames[0].date.slice(0, 4)} – ${frames[N - 1].date.slice(2, 4)}`;
+const FILM_Y = 2 * 30 + 30; // the strip's height past the image: two hole rows and the edge print (ai.css)
 
 type Mode = 'film' | 'row';
 type Hold = { k: number; by: 'pointer' } | { i: number; by: 'focus' } | null;
 
 export function Ai() {
   const section = useRef<HTMLElement>(null);
+  const band = useRef<HTMLDivElement>(null);
   const clip = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
-  const loupe = useRef<HTMLDivElement>(null);
   const cards = useRef<(HTMLButtonElement | null)[]>([]);
   const print = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<Mode>('film');
-  const [shown, setShown] = useState(0); // the frame under the loupe
+  const [shown, setShown] = useState(0); // the lit frame
   const [open, setOpen] = useState<number | null>(null);
   const hold = useRef<Hold>(null);
   const focusHold = useRef<number | null>(null);
@@ -44,7 +44,7 @@ export function Ai() {
   const offset = useRef(-1); // where the film stands, px; -1 until measured
   openRef.current = open;
 
-  // phones and reduced motion get a strip you swipe, with no loupe and no running film
+  // phones and reduced motion get a strip you swipe, and the film does not run
   useEffect(() => {
     const narrow = matchMedia('(max-width: 899px)');
     const still = matchMedia('(prefers-reduced-motion: reduce)');
@@ -65,22 +65,27 @@ export function Ai() {
     let visible = false;
     let last = 0;
     let speed = 0;
-    let lx = 0; // the loupe's centre, in the clip's coordinates
+    let lx = 0; // where the light falls, in the clip's coordinates
     let shownNow = -1;
     // the film's position wraps over one roll, placed so that the focusable copy (the second) is the
-    // one that passes under the loupe: frame i of it sits there at offset lo + i * pitch
+    // one that passes the middle: frame i of it sits there at offset lo + i * pitch
     const geo = { w: 0, fw: 0, pitch: 0, L: 0, lo: 0 };
     const measure = () => {
       const c = clip.current;
       const a = cards.current[0];
       const b = cards.current[1];
-      if (!c || !a || !b) return;
+      const bd = band.current;
+      if (!c || !a || !b || !bd || !section.current) return;
+      // the image takes the band's height less the strip's own rows, at most 42% of the width
+      const pad = parseFloat(getComputedStyle(bd).paddingTop) * 2;
+      const fw = Math.round(Math.max(180, Math.min((bd.clientHeight - pad - FILM_Y) * 1.2, bd.clientWidth * 0.42)));
+      section.current.style.setProperty('--fw', `${fw}px`);
       geo.w = c.clientWidth;
       geo.fw = a.offsetWidth;
       geo.pitch = b.offsetLeft - a.offsetLeft;
       geo.L = N * geo.pitch;
       geo.lo = N * geo.pitch + geo.fw / 2 - geo.w / 2;
-      if (offset.current < 0) offset.current = geo.lo; // frame 01 under the loupe on arrival
+      if (offset.current < 0) offset.current = geo.lo; // frame 01 in the middle on arrival
       if (lx === 0) lx = geo.w / 2;
     };
     const tick = (t: number) => {
@@ -93,25 +98,23 @@ export function Ai() {
       const want = held ? 0 : BASE + Math.min(420, Math.abs(scrollState().velocity) * 7);
       speed += (want - speed) * (1 - Math.exp(-dt * (want < speed ? 7 : 2.2)));
       let off = offset.current + speed * dt;
-      if (h?.by === 'focus') off += (lo + h.i * pitch - off) * (1 - Math.exp(-dt * 6)); // a keyboard focus brings its frame to the loupe
+      if (h?.by === 'focus') off += (lo + h.i * pitch - off) * (1 - Math.exp(-dt * 6)); // a keyboard focus brings its frame to the middle
       off = ((((off - lo) % L) + L) % L) + lo;
       offset.current = off;
       if (track.current) track.current.style.transform = `translate3d(${(-off).toFixed(2)}px,0,0)`;
-      // the loupe glides to the held frame, or back to the middle
+      // the light glides to the held frame, or back to the middle
       const lwant = h?.by === 'pointer' ? h.k * pitch + fw / 2 - off : h?.by === 'focus' ? (N + h.i) * pitch + fw / 2 - off : w / 2;
       lx += (lwant - lx) * (1 - Math.exp(-dt * 9));
-      if (loupe.current) loupe.current.style.transform = `translate3d(${(lx - w / 2).toFixed(2)}px,0,0)`;
-      // every frame on screen: sharp and large under the loupe, soft and small away from it
+      // every frame on screen: lit at the light, darker away from it; the frames never change size
       let near = -1;
       let nd = Infinity;
       cards.current.forEach((el, k) => {
         if (!el) return;
         const cx = k * pitch + fw / 2 - off;
-        if (cx < -fw || cx > w + fw) { el.style.setProperty('--focus', '0'); el.style.zIndex = ''; return; }
+        if (cx < -fw || cx > w + fw) { el.style.setProperty('--focus', '0'); return; }
         const d = Math.abs(cx - lx) / pitch;
-        const f = smooth(0.95, 0.22, d);
+        const f = smooth(0.9, 0.18, d);
         el.style.setProperty('--focus', f.toFixed(3));
-        el.style.zIndex = String(10 + Math.round(f * 10));
         if (d < nd) { nd = d; near = k; }
       });
       if (near >= 0 && near % N !== shownNow) { shownNow = near % N; setShown(shownNow); }
@@ -124,14 +127,14 @@ export function Ai() {
     });
     if (section.current) io.observe(section.current);
     measure();
-    const ro = new ResizeObserver(measure); // the clip's width, not only the window's
-    if (clip.current) ro.observe(clip.current);
+    const ro = new ResizeObserver(measure); // the band's size, not only the window's
+    if (band.current) ro.observe(band.current);
     return () => { io.disconnect(); ro.disconnect(); cancelAnimationFrame(raf); };
     // `close` only reads refs; it is stable enough for the loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
-  // the pointer on the film: the loupe goes to the frame under it and the film waits
+  // the pointer on the film: the light goes to the frame under it and the film waits
   const onMove = (e: RPointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== 'mouse' || mode !== 'film' || !clip.current || !cards.current[1] || !cards.current[0]) return;
     const pitch = cards.current[1].offsetLeft - cards.current[0].offsetLeft;
@@ -152,7 +155,7 @@ export function Ai() {
   useLayoutEffect(() => {
     if (open === null || !print.current) return;
     openedAt.current = scrollY;
-    const paper = openedFrom.current?.querySelector('.fcard__paper');
+    const paper = openedFrom.current?.querySelector('.fcard__img');
     const to = print.current.getBoundingClientRect();
     const from = paper?.getBoundingClientRect();
     const tw = from && mode === 'film'
@@ -169,7 +172,7 @@ export function Ai() {
     if (open === null || closing.current) return;
     const el = print.current;
     const card = openedFrom.current;
-    const paper = card?.querySelector('.fcard__paper');
+    const paper = card?.querySelector('.fcard__img');
     closing.current = true;
     const done = () => { closing.current = false; setOpen(null); card?.focus({ preventScroll: true }); };
     if (!el || !paper || mode === 'row') { done(); return; }
@@ -205,13 +208,12 @@ export function Ai() {
         <h2 id="ai-title" className="ai__title">{ai.title}</h2>
         <p className="ai__line">{ai.line[0]} <em>{ai.line[1]}</em></p>
       </header>
-      <p className="ai__roll"><span className="ai__bracket ai__bracket--r" aria-hidden="true" />{two(N - 1)} frames · {years}</p>
 
-      <div className="ai__band">
+      <div className="ai__band" ref={band}>
         <div className="ai__film" ref={clip} onPointerMove={onMove} onPointerLeave={onLeave}>
           <div className="ai__track" ref={track} role="list" aria-label="AI projects, in order">
             {Array.from({ length: copies }, (_, c) => (
-              // the copies are the same roll again: the middle one speaks to assistive tech, the rest only to the pointer
+              // the copies are the same roll again: the second speaks to assistive tech, the rest only to the pointer
               <div key={c} className="ai__copy" role={c === 1 || copies === 1 ? undefined : 'presentation'} aria-hidden={copies > 1 && c !== 1 ? true : undefined}>
                 {frames.map((f, i) => {
                   const k = c * N + i;
@@ -228,21 +230,19 @@ export function Ai() {
                         tabIndex={copies > 1 && c !== 1 ? -1 : 0}
                         style={{ '--focus': 0 } as CSSProperties}
                       >
-                        <span className="fcard__date">{f.date} · {two(i)}</span>
-                        <span className="fcard__paper">
-                          <span className="fcard__tag"><span>Fig {i + 1}</span><span>{f.name}</span></span>
-                          <span className="fcard__img">
-                            {f.image
-                              // eslint-disable-next-line @next/next/no-img-element
-                              ? <img src={f.image} alt={f.imageAlt ?? ''} width={1200} height={1000} loading={c === 1 && i < 4 ? 'eager' : 'lazy'} />
-                              : <FrameVisual kind={f.visual} className="fcard__visual" />}
-                          </span>
+                        <span className="fcard__img">
+                          {f.image
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={f.image} alt={f.imageAlt ?? ''} width={1200} height={1000} loading={c === 1 && i < 4 ? 'eager' : 'lazy'} />
+                            : <FrameVisual kind={f.visual} className="fcard__visual" />}
                           {f.keeper && (
                             <svg className="fcard__mark" viewBox="0 0 300 260" aria-hidden="true">
                               <path d="M46 72C70 26 180 10 246 34c62 22 56 112 28 160-30 52-150 62-214 30C-6 190 4 110 72 60" />
                             </svg>
                           )}
                         </span>
+                        {/* the edge print: frame number, name and date, printed on the film itself */}
+                        <span className="fcard__edge"><b>▸ {two(i)}</b><span>{f.name}</span><span>{f.date}</span></span>
                         {mode === 'row' && <span className="fcard__line">{f.line}</span>}
                       </button>
                     </div>
@@ -251,25 +251,24 @@ export function Ai() {
               </div>
             ))}
           </div>
-          <div className="ai__loupe" ref={loupe} aria-hidden="true"><i /><i /><i /><i /></div>
         </div>
       </div>
 
-      {/* what the loupe is on, hanging from the left margin */}
-      {mode === 'film' && (
-        <div className="ai__cap" aria-live="polite">
-          <div className="ai__capStack">
+      <div className="ai__foot">
+        {/* the lit frame, from the left margin */}
+        {mode === 'film' && (
+          <div className="ai__cap" aria-live="polite">
             {frames.map((f, i) => (
               <div key={f.id} className="ai__capItem" data-active={i === shown ? '' : undefined} aria-hidden={i !== shown} inert={i !== shown}>
+                <p className="ai__capIndex">{two(i)} / {two(N - 1)} · {f.date}</p>
+                <p className="ai__capName">{f.name}</p>
                 <p className="ai__capLine">{f.line}</p>
-                <p className="ai__capRead"><b>{f.name}</b>{[...f.readouts, ...(f.chip ? [f.chip] : [])].map((r) => <span key={r}> · {r}</span>)}</p>
               </div>
             ))}
           </div>
-          <p className="ai__iso">{HUD.iso}<span className="ai__bracket ai__bracket--br" aria-hidden="true" /></p>
-        </div>
-      )}
-      <p className="ai__hint"><span className="ai__mouse" aria-hidden="true" />{mode === 'film' ? 'The film runs on its own · hover holds a frame · click prints it' : 'Swipe the film · tap a frame to print it'}</p>
+        )}
+        <p className="ai__hint"><span className="ai__mouse" aria-hidden="true" />{mode === 'film' ? 'Hover holds a frame · click prints it' : 'Swipe the film · tap a frame to print it'}</p>
+      </div>
 
       {open !== null && (
         <div className="ai__print" role="dialog" aria-modal="false" aria-labelledby="ai-print-name">

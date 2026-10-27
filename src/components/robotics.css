@@ -74,19 +74,24 @@
   transition: background 0.3s var(--out), translate 0.3s var(--out), box-shadow 0.3s var(--out);
 }
 .robotics__openBtn:hover, .robotics__back:hover { background: var(--c-sky-deep); translate: 0 -1px; }
-/* the robot's one call to action: a full-size pill with the hero's apricot on its arrow */
+/* the robot's one call to action: a pill of the header's frosted glass with a blue arrow disc */
 .robotics__openBtn {
   display: inline-flex;
   align-items: center;
   gap: 14px;
   margin-top: 20px;
   padding: 6px 6px 6px 22px;
+  background: rgb(255 255 255 / 0.42);
+  color: var(--c-ink);
   font: 600 15px/1 var(--f-body);
-  box-shadow: 0 1px 2px rgb(18 26 38 / 0.2), 0 16px 32px -14px rgb(18 26 38 / 0.6);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.9), 0 1px 2px rgb(30 87 143 / 0.08), 0 16px 32px -16px rgb(30 87 143 / 0.42);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
 }
-.robotics__openBtn:hover { box-shadow: 0 1px 2px rgb(18 26 38 / 0.2), 0 20px 36px -14px rgb(30 87 143 / 0.7); }
+.robotics__openBtn:hover { background: rgb(255 255 255 / 0.7); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.85), inset 0 1px 0 rgb(255 255 255 / 0.95), 0 1px 2px rgb(30 87 143 / 0.1), 0 20px 36px -16px rgb(30 87 143 / 0.55); }
 .robotics__openBtn:focus-visible { outline: 2px solid var(--c-sky-deep); outline-offset: 3px; }
-.robotics__openArrow { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--c-signal); color: var(--c-ink); transition: rotate 0.4s var(--out); }
+.robotics__openArrow { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--c-sky-mid); color: var(--c-paper); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3); transition: rotate 0.4s var(--out), background 0.3s var(--out); }
+.robotics__openBtn:hover .robotics__openArrow { background: var(--c-sky-deep); }
 .robotics__openArrow svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .robotics__openBtn:hover .robotics__openArrow { rotate: 45deg; }
 

@@ -1,6 +1,10 @@
-// Hero → Robotics: a nudge of the wheel past the hero glides the whole way to the robots' stage, and
-// a nudge back up from the band between them returns to the hero. Wheel only, so touch stays native;
-// the trailing flick of a trackpad is swallowed until the glide has settled.
+// Section handoffs: a nudge of the wheel past one stage glides the whole way to the next, and a nudge
+// back up from the next returns to where the last one rested.
+// - Hero → Robotics: past the hero to the robots' stage; up from the first robot back to the hero.
+// - Robotics → AI: once the arch has turned to its last robot, down glides to the AI reel; up from
+//   the reel's top glides back to the last robot. Only while the arch is pinned (ring mode).
+// Wheel only, so touch stays native; the trailing flick of a trackpad is swallowed until the glide
+// has settled.
 import { glideTo, onPage, onWheelGate } from '@/engine';
 
 const GLIDE = 1.1; // s
@@ -11,17 +15,31 @@ export function startHandoff() {
     const hero = document.querySelector<HTMLElement>('[data-hero]');
     const stage = document.getElementById('robotics');
     if (!hero || !stage) return;
+    const ring = stage.closest<HTMLElement>('.robotics');
+    const reel = document.getElementById('ai');
     let until = 0;
     return onWheelGate((dy, y) => {
       const now = performance.now();
       if (now < until) return true;
+      const glide = (to: number) => {
+        glideTo(to, GLIDE);
+        until = now + GLIDE * 1000 + SETTLE;
+        return true;
+      };
       const dest = Math.round(stage.getBoundingClientRect().top + y);
-      const down = dy > 0 && y < dest - 4;
-      const up = dy < 0 && y > 4 && y <= dest + 4; // from the first robot straight back
-      if (!down && !up) return false;
-      glideTo(down ? dest : 0, GLIDE);
-      until = now + GLIDE * 1000 + SETTLE;
-      return true;
+      if (dy > 0 && y < dest - 4) return glide(dest);
+      if (dy < 0 && y > 4 && y <= dest + 4) return glide(0); // from the first robot straight back
+      // the arch's last robot rests where its track stops pinning, and has settled 30% of a step before
+      // (Robotics.tsx, turnOf)
+      if (!reel || !ring || ring.dataset.mode !== 'ring') return false;
+      const run = stage.offsetHeight - innerHeight;
+      const steps = ring.querySelectorAll('.rcard').length - 1;
+      const last = Math.round(dest + run);
+      const settled = steps > 0 ? Math.round(dest + ((steps - 0.3) / steps) * run) : last;
+      const ai = Math.round(reel.getBoundingClientRect().top + y);
+      if (dy > 0 && y >= settled - 4 && y < ai - 4) return glide(ai);
+      if (dy < 0 && y > last + 4 && y <= ai + 4) return glide(last);
+      return false;
     });
   });
 }
