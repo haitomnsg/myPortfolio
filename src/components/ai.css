@@ -1,0 +1,237 @@
+/* ============================================================
+   02 AI: the contact sheet (Ai.tsx)
+   ============================================================ */
+.ai {
+  --c-sky-mid: #3f78bd;
+  --hair: #c9daec; /* the film's own hairline blue */
+  --head-top: clamp(88px, 10.5svh, 104px);
+  --fw: clamp(200px, 15.5vw, 300px); /* one frame */
+  --gap: clamp(14px, 1.6vw, 26px);
+  --loupe: min(clamp(380px, 34vw, 520px), 62svh);
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* the roll is wider than the page; it must not stretch it */
+  grid-template-rows: auto 1fr auto auto;
+  min-height: 100svh;
+  overflow: clip;
+  color: var(--c-ink);
+  /* the ring's paper floor carries on into a pale sky behind the film, and back to paper */
+  background:
+    radial-gradient(42% 46% at 50% 54%, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0) 70%),
+    linear-gradient(180deg, var(--c-paper) 0%, #e4edf7 26%, #d3e3f3 52%, #e6eef7 78%, var(--c-paper) 100%);
+}
+
+.ai__head { padding: var(--head-top) var(--margin) 0; }
+.ai__index, .ai__roll {
+  position: relative;
+  font: 500 13px/1 var(--f-mono);
+  letter-spacing: 0.02em;
+  color: var(--c-sky-deep);
+}
+.ai__index { padding: 0.9em 0 0 1.35em; }
+.ai__bracket { position: absolute; left: 0; top: 0; width: 2.4em; height: 2.4em; border: 0 solid currentColor; border-width: 1.5px 0 0 1.5px; }
+.ai__bracket--r { left: auto; right: 0; border-width: 1.5px 1.5px 0 0; }
+.ai__bracket--br { left: auto; right: 0; top: auto; bottom: 0; border-width: 0 1.5px 1.5px 0; }
+.ai__roll { position: absolute; right: var(--margin); top: var(--head-top); padding: 0.9em 1.35em 0 0; text-align: right; text-transform: uppercase; }
+.ai__title {
+  margin: 0.08em 0 0 -0.05em;
+  font-family: var(--f-display);
+  font-size: clamp(56px, 6vw, 112px);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.045em;
+}
+.ai__line { margin-top: 0.2em; font-size: clamp(20px, 1.75vw, 30px); font-weight: 300; line-height: 1.04; letter-spacing: -0.03em; }
+.ai__line em { font-style: normal; color: var(--c-sky-mid); }
+
+/* the roll: a full-bleed strip of 35mm film with the loupe over its middle */
+.ai__band { position: relative; min-width: 0; align-self: center; padding: clamp(24px, 4svh, 48px) 0; }
+.ai__film {
+  position: relative;
+  min-width: 0;
+  padding: 28px 0 24px;
+  overflow-x: clip;
+  overflow-y: visible;
+  background: rgb(255 255 255 / 0.46);
+  box-shadow: inset 0 1px 0 var(--hair), inset 0 -1px 0 var(--hair);
+}
+/* sprocket holes along both edges */
+.ai__film::before, .ai__film::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='16'%3E%3Crect x='6.5' y='3.5' width='15' height='9' rx='2' fill='none' stroke='%23c9daec'/%3E%3C/svg%3E") repeat-x center;
+  pointer-events: none;
+}
+.ai__film::before { top: 5px; }
+.ai__film::after { bottom: 5px; }
+.ai__track { display: flex; width: max-content; will-change: transform; }
+.ai__copy { display: flex; gap: var(--gap); padding-right: var(--gap); }
+.ai__item { display: contents; }
+
+.fcard {
+  position: relative;
+  z-index: 10;
+  flex: none;
+  width: var(--fw);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.fcard:focus-visible { outline: none; }
+.fcard:focus-visible .fcard__paper { box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.07), 0 0 0 2px var(--c-paper), 0 0 0 4px var(--c-sky-deep); }
+.fcard__date { display: block; margin: 0 0 6px 4px; font: 500 12px/1 var(--f-mono); letter-spacing: 0.04em; color: var(--c-sky-deep); opacity: calc(0.5 + var(--focus, 0) * 0.5); }
+/* the paper: sharp and a little larger under the loupe, soft and smaller away from it (Ai.tsx sets --focus) */
+.fcard__paper {
+  position: relative;
+  display: block;
+  padding: 7px 7px 8px;
+  border-radius: 14px;
+  background: var(--c-paper);
+  box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.07), 0 2px 3px rgb(30 87 143 / 0.05), 0 22px 44px -26px rgb(30 87 143 / 0.5);
+  transform-origin: 50% 50%;
+  scale: calc(0.94 + var(--focus, 0) * 0.24);
+  filter: blur(calc((1 - var(--focus, 0)) * 2.4px));
+  opacity: calc(0.76 + var(--focus, 0) * 0.24);
+  transition: box-shadow 0.3s var(--out);
+}
+.fcard__tag { display: flex; justify-content: space-between; gap: 8px; padding: 2px 3px 6px; font: 500 9.5px/1 var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase; color: rgb(18 26 38 / 0.62); }
+.fcard__tag span:last-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.fcard__img { position: relative; display: block; aspect-ratio: 1.2; overflow: hidden; border-radius: 8px; background: #fff; }
+.fcard__img img, .fcard__visual { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* a keeper, circled in grease pencil */
+.fcard__mark { position: absolute; inset: -7% -9%; width: 118%; height: 114%; overflow: visible; pointer-events: none; rotate: -3deg; opacity: calc(0.75 + var(--focus, 0) * 0.25); }
+.fcard__mark path { fill: none; stroke: var(--c-signal); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.fcard__line { display: none; }
+
+/* the loupe: a hairline circle with four ticks, glass at the top-left */
+.ai__loupe {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 30;
+  width: var(--loupe);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  border: 1.5px solid rgb(30 87 143 / 0.72);
+  background: radial-gradient(circle at 32% 26%, rgb(255 255 255 / 0.34), rgb(255 255 255 / 0) 52%);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.45), inset 0 0 0 1px rgb(255 255 255 / 0.5);
+  pointer-events: none;
+  will-change: transform;
+}
+.ai__loupe i { position: absolute; background: rgb(30 87 143 / 0.72); }
+.ai__loupe i:nth-child(1), .ai__loupe i:nth-child(2) { left: 50%; width: 1.5px; height: 22px; translate: -50% 0; }
+.ai__loupe i:nth-child(1) { top: -32px; }
+.ai__loupe i:nth-child(2) { bottom: -32px; }
+.ai__loupe i:nth-child(3), .ai__loupe i:nth-child(4) { top: 50%; width: 22px; height: 1.5px; translate: 0 -50%; }
+.ai__loupe i:nth-child(3) { left: -32px; }
+.ai__loupe i:nth-child(4) { right: -32px; }
+
+/* what the loupe is on */
+.ai__cap { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 24px; padding: 0 var(--margin); }
+.ai__capStack { display: grid; }
+.ai__capItem { grid-area: 1 / 1; opacity: 0; visibility: hidden; translate: 0 8px; transition: opacity 0.3s var(--out), translate 0.5s var(--out), visibility 0s 0.3s; }
+.ai__capItem[data-active] { opacity: 1; visibility: visible; translate: 0 0; transition-delay: 0.05s, 0.05s, 0s; }
+.ai__capLine { max-width: 30ch; font-size: clamp(22px, 2.1vw, 34px); font-weight: 300; line-height: 1.1; letter-spacing: -0.03em; }
+.ai__capRead { position: relative; margin-top: 14px; padding: 0.7em 0 0.7em 1.4em; font: 500 13px/1.3 var(--f-mono); letter-spacing: 0.02em; color: var(--c-sky-deep); }
+.ai__capRead::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1.4em; border: 0 solid currentColor; border-width: 0 0 1.5px 1.5px; }
+.ai__capRead b { font-weight: 500; color: var(--c-ink); }
+.ai__iso { position: relative; padding: 0 1.35em 0.9em 0; font: 500 13px/1 var(--f-mono); letter-spacing: 0.02em; color: var(--c-sky-deep); }
+
+.ai__hint { display: flex; align-items: center; gap: 14px; padding: clamp(20px, 3.5svh, 36px) var(--margin) clamp(24px, 4svh, 40px); font: 500 11.5px/1 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: rgb(18 26 38 / 0.6); }
+.ai__mouse { position: relative; flex: none; width: 13px; height: 21px; border: 1.5px solid currentColor; border-radius: 7px; }
+.ai__mouse::after { content: ''; position: absolute; left: 50%; top: 4px; width: 1.5px; height: 4px; translate: -50% 0; background: currentColor; }
+
+/* the print: the chosen frame grows to a full card over the page */
+.ai[data-open] .ai__film, .ai[data-open] .ai__cap, .ai[data-open] .ai__head, .ai[data-open] .ai__roll, .ai[data-open] .ai__hint { pointer-events: none; }
+.ai__print {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  gap: clamp(24px, 4vw, 72px);
+  align-items: center;
+  padding: clamp(92px, 12svh, 132px) var(--margin) clamp(28px, 5svh, 56px);
+  background:
+    radial-gradient(60% 55% at 50% 72%, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0) 70%),
+    linear-gradient(180deg, #e4edf7 0%, var(--c-field-hi) 40%, var(--c-paper) 100%);
+  animation: ai-print-in 0.4s var(--out) both;
+}
+@keyframes ai-print-in { from { opacity: 0; } }
+@keyframes ai-rise { from { opacity: 0; translate: 0 10px; } }
+.ai__printText { animation: ai-rise 0.7s 0.15s var(--out) both; }
+.ai__printIndex { font: 500 12px/1 var(--f-mono); letter-spacing: 0.04em; color: var(--c-sky-deep); }
+.ai__printName { margin-top: 14px; font-family: var(--f-display); font-size: clamp(44px, 5.2vw, 96px); font-weight: 800; line-height: 0.9; letter-spacing: -0.045em; }
+.ai__printLine { margin-top: 18px; max-width: 34ch; font-size: clamp(17px, 1.3vw, 21px); line-height: 1.45; color: rgb(18 26 38 / 0.8); }
+.ai__stat { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; font: 500 12px/1.2 var(--f-mono); letter-spacing: 0.03em; color: var(--c-sky-deep); }
+.ai__stat span { font: 300 clamp(56px, 6vw, 104px)/0.9 var(--f-body); letter-spacing: -0.04em; color: var(--c-ink); font-variant-numeric: tabular-nums; }
+.ai__chip { display: inline-block; margin-top: 18px; padding: 8px 12px; border-radius: 999px; background: rgb(255 255 255 / 0.8); box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.1); font: 500 12px/1 var(--f-mono); }
+.ai__specs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; padding: 0; list-style: none; }
+.ai__specs li::before, .ai__specs li::after { content: none; }
+.ai__specs li { padding: 6px 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.14); font: 500 11.5px/1 var(--f-mono); letter-spacing: 0.02em; color: rgb(18 26 38 / 0.72); }
+.ai__back {
+  display: block;
+  margin-top: 28px;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  font: 500 13px/1 var(--f-body);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.3s var(--out), translate 0.3s var(--out);
+}
+.ai__back:hover { background: var(--c-sky-deep); translate: 0 -1px; }
+.ai__printFrame {
+  position: relative;
+  aspect-ratio: 1.5;
+  max-height: calc(100svh - clamp(120px, 17svh, 188px));
+  justify-self: end;
+  width: 100%;
+  padding: 16px;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--c-paper);
+  box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.08), 0 40px 90px -40px rgb(30 87 143 / 0.5);
+  outline: none;
+}
+.ai__printImg, .ai__printVisual { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 12px; background: #fff; }
+.ai__close {
+  position: absolute;
+  z-index: 3;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: inset 0 0 0 1px rgb(18 26 38 / 0.12);
+  color: var(--c-ink);
+  font: 300 24px/1 var(--f-body);
+  cursor: pointer;
+}
+.ai__close:hover { background: var(--c-ink); color: var(--c-paper); }
+
+/* phones and reduced motion: the strip scrolls, no loupe, the film does not run */
+.ai[data-mode='row'] { grid-template-rows: auto auto auto; min-height: 0; padding-bottom: 8px; }
+.ai[data-mode='row'] .ai__roll { display: none; }
+.ai[data-mode='row'] .ai__band { padding: clamp(28px, 5svh, 48px) 0 0; }
+.ai[data-mode='row'] .ai__track { width: auto; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 var(--margin); scrollbar-width: none; will-change: auto; }
+.ai[data-mode='row'] .ai__track::-webkit-scrollbar { display: none; }
+.ai[data-mode='row'] .ai__copy { padding: 0 var(--margin); }
+.ai[data-mode='row'] .fcard { width: min(78vw, 360px); scroll-snap-align: start; }
+.ai[data-mode='row'] .fcard__paper { scale: 1; filter: none; opacity: 1; }
+.ai[data-mode='row'] .fcard__date { opacity: 1; }
+.ai[data-mode='row'] .fcard__line { display: block; margin-top: 10px; padding: 0 4px; font-size: 15px; line-height: 1.45; color: rgb(18 26 38 / 0.75); }
+.ai[data-mode='row'] .ai__loupe { display: none; }
+.ai[data-mode='row'] .ai__print { grid-template-columns: minmax(0, 1fr); align-content: start; overflow-y: auto; padding: 84px var(--margin) 40px; }
+.ai[data-mode='row'] .ai__printFrame { order: -1; justify-self: stretch; max-height: none; }

@@ -10,13 +10,14 @@ import { RescueFigure } from './figures/RescueFigure';
 import { TomatoBotFigure } from './figures/TomatoBotFigure';
 import './robotics.css';
 
-// Chapter 01, the focus ring (docs/ROBOTICS_MOCKUP_PROMPT.md): the robots stand on a wheel seen by
-// the hero's camera. Scroll turns it one robot at a time, with a pause on each; the robot in front is
-// sharp and large, the rest fall back and out of focus. Click a robot and it comes to the front and
-// opens; the open view runs its live figure.
+// Chapter 01, the focus ring (docs/ROBOTICS_MOCKUP_PROMPT.md): the robots stand on an arch, a half
+// circle of cards that each lean along it. Scroll turns it one robot at a time, with a pause on each;
+// the robot at the top wears the hero's focus corners and its text sits inside the arch. Click a
+// robot and it comes to the top and opens; the open view runs its live figure.
 
 const N = robots.length;
 const STEP = 0.7; // screens of scroll per robot
+const ARC = 0.74; // radians between neighbouring cards: five robots span the half circle
 const smooth = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);
@@ -35,10 +36,7 @@ export function Robotics() {
   const track = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLElement>(null);
-  const nowRef = useRef<HTMLDivElement>(null);
-  const rim = useRef<SVGPathElement>(null);
   const cards = useRef<(HTMLButtonElement | null)[]>([]);
-  const dots = useRef<(SVGCircleElement | null)[]>([]);
   const frame = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<Mode>('ring');
   const [front, setFront] = useState(0);
@@ -84,53 +82,45 @@ export function Robotics() {
     let raf = 0;
     let visible = false;
     let shown = -1;
-    const place = () => {
+    // the arch: cards of one size stand on a half circle, each leaning along it, the front one at the
+    // top; the ends dip below the stage, where a card leaving one side comes back on the other
+    const geo = { cx: 0, cy: 0, R: 0, cw: 0, ch: 0 };
+    const measure = () => {
       const st = stage.current;
       if (!st) return;
       const w = st.clientWidth;
       const h = st.clientHeight;
-      // cards stand on a wide circle whose centre is far below the stage, so the ring fans out
-      const R = 1.35 * w;
-      const gap = Math.asin(Math.min(0.99, (0.47 * w) / R)) / 2;
-      const cx = w / 2;
-      // the front card stands just under the heading and the robot's text, whichever ends lower, and
-      // the cards shrink to fit the height left, so nothing overlaps on a short, wide screen
-      const below = (el: HTMLElement | null) => (el ? el.offsetTop + el.offsetHeight : 0);
-      const top = Math.max(h * 0.34, below(headRef.current) + 32, below(nowRef.current) + 32);
-      const cw = Math.round(Math.min(400, 0.22 * w, (h - top - 64 - 40) / 0.78));
-      const cardW = `${Math.max(220, cw)}px`;
-      if (st.style.getPropertyValue('--card-w') !== cardW) st.style.setProperty('--card-w', cardW);
+      const cw = Math.round(Math.max(220, Math.min(360, 0.2 * w, 0.4 * h)));
+      st.style.setProperty('--card-w', `${cw}px`);
+      const ch = cards.current[0]?.offsetHeight ?? cw;
+      const R = (cw + 18) / ARC;
+      // the top card clears the header and the arch's outer edge clears the heading's corner; the
+      // cards at either side sit low, partly out of the stage
+      const out = Math.hypot(R + ch / 2, cw / 2) + 16;
+      const head = headRef.current;
+      const hx = head ? w / 2 - (head.offsetLeft + head.offsetWidth) : out;
+      const clear = head && hx < out ? head.offsetTop + head.offsetHeight + Math.sqrt(out * out - hx * hx) : 0;
+      const cy = Math.max(h * 0.8, 112 + ch / 2 + R, clear);
+      Object.assign(geo, { cx: w / 2, cy, R, cw, ch });
+      // the robot's text sits inside the arch, under the top card
+      st.style.setProperty('--arch-x', `${(w / 2).toFixed(1)}px`);
+      st.style.setProperty('--arch-y', `${cy.toFixed(1)}px`);
+      st.style.setProperty('--arch-in', `${(R - ch / 2).toFixed(1)}px`);
+    };
+    const place = () => {
+      const { cx, cy, R, cw, ch } = geo;
       const a = open === null ? (turn.current = turnOf(rawAt())) : turn.current;
-      // the rim runs under the cards' feet: the front card's height plus a little air
-      const foot = (cards.current[0]?.offsetHeight ?? 400) + 26;
-      const rimR = R - foot;
-      if (rim.current) {
-        const arc = (u: number) => `${(cx + rimR * Math.sin(u)).toFixed(1)} ${(top + R - rimR * Math.cos(u)).toFixed(1)}`;
-        const span = gap * 2.6;
-        rim.current.setAttribute('d', `M${arc(-span)} A${rimR.toFixed(1)} ${rimR.toFixed(1)} 0 0 1 ${arc(span)}`);
-      }
       cards.current.forEach((el, i) => {
         if (!el) return;
         let o = ((i - a) % N + N) % N;
         if (o > N / 2) o -= N;
-        const t = o * gap;
-        const x = R * Math.sin(t);
-        const y = R * (1 - Math.cos(t));
+        const t = o * ARC;
         const d = Math.abs(o);
-        const scale = 1 - 0.19 * Math.min(d, 2.4);
-        el.style.transform = `translate3d(${(cx + x).toFixed(1)}px, ${(top + y).toFixed(1)}px, ${(-d * 90).toFixed(1)}px) translate(-50%, 0) rotate(${(t * 57.3).toFixed(2)}deg) rotateY(${(-o * 16).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
-        el.style.setProperty('--blur', `${(d * 1.35).toFixed(2)}px`);
+        el.style.transform = `translate3d(${(cx + R * Math.sin(t) - cw / 2).toFixed(1)}px, ${(cy - R * Math.cos(t) - ch / 2).toFixed(1)}px, 0) rotate(${(t * 57.2958).toFixed(2)}deg)`;
         el.style.setProperty('--focus', smooth(0.42, 0.06, d).toFixed(3));
-        el.style.opacity = (1 - smooth(1.95, 2.45, d)).toFixed(3);
+        el.style.opacity = (1 - smooth(2.1, 2.45, d)).toFixed(3);
         el.style.zIndex = String(100 - Math.round(d * 10));
         el.tabIndex = d < 0.5 ? 0 : -1;
-        const dot = dots.current[i];
-        if (dot) {
-          dot.setAttribute('cx', (cx + rimR * Math.sin(t)).toFixed(1));
-          dot.setAttribute('cy', (top + R - rimR * Math.cos(t)).toFixed(1));
-          dot.setAttribute('opacity', (1 - smooth(1.95, 2.45, d)).toFixed(2));
-          dot.toggleAttribute('data-front', d < 0.5);
-        }
       });
       const near = Math.round(a);
       if (near !== shown) { shown = near; setFront(near); }
@@ -147,8 +137,9 @@ export function Robotics() {
       if (visible && !raf) raf = requestAnimationFrame(tick);
     });
     if (section.current) io.observe(section.current);
+    measure();
     place();
-    const onResize = () => place();
+    const onResize = () => { measure(); place(); };
     addEventListener('resize', onResize);
     return () => { io.disconnect(); cancelAnimationFrame(raf); removeEventListener('resize', onResize); };
     // `close` only reads refs; it is stable enough for the loop
@@ -227,7 +218,7 @@ export function Robotics() {
         </header>
 
         {mode === 'ring' && (
-          <div className="robotics__now" ref={nowRef} aria-live="polite">
+          <div className="robotics__now" aria-live="polite">
             {robots.map((r, i) => (
               <div key={r.id} className="robotics__nowItem" data-active={i === front ? '' : undefined} aria-hidden={i !== front} inert={i !== front}>
                 <p className="robotics__nowIndex">{two(i)} / {two(N - 1)}</p>
@@ -243,12 +234,6 @@ export function Robotics() {
         )}
 
         <div className="robotics__ring" role="list" aria-label="Robots">
-          {mode === 'ring' && (
-            <svg className="robotics__rim" aria-hidden="true">
-              <path ref={rim} />
-              {robots.map((r, i) => <circle key={r.id} ref={(el) => { dots.current[i] = el; }} r="5" />)}
-            </svg>
-          )}
           {robots.map((r, i) => (
             <div role="listitem" key={r.id} className="robotics__item">
               <button

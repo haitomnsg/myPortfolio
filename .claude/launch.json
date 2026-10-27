@@ -34,6 +34,17 @@
         "4410"
       ],
       "port": 4410
+    },
+    {
+      "name": "pet-demo",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        ".claude/skills/awwwards/scripts/serve.mjs",
+        "C:/Users/LOQ/AppData/Local/Temp/claude/D--MyPortfolio/47507ec1-b44a-4428-b417-5be9cf3bc6c3/scratchpad/pet/demo",
+        "--port",
+        "4420"
+      ],
+      "port": 4420
     }
   ]
 }

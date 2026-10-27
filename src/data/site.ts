@@ -199,3 +199,104 @@ export const record = {
     { name: '2026', text: 'TomatoBot paper published. Intern at EncodeX. Harvard Health Hackathon top 20.' },
   ],
 };
+
+/** Chapter 02, the contact sheet: every AI frame on one roll of film, in time order (docs/PROFILE.md §2, §3). */
+export type Frame = {
+  id: string;
+  name: string;
+  /** when it was built, YYYY-MM */
+  date: string;
+  line: string;
+  /** the mono readouts under the loupe and in the print; facts only. The chip is the award or the paper */
+  readouts: string[];
+  stat?: { value: string; label: string };
+  chip?: string;
+  /** circled in grease pencil: a keeper */
+  keeper?: boolean;
+  /** the drawn output the frame shows when there is no real screen */
+  visual: 'bench' | 'phulbari' | 'tomato-vision' | 'doclipi' | 'recyclo' | 'dementiabot' | 'risk';
+  /** a real screen for the frame, and the larger one the print shows */
+  image?: string;
+  imageAlt?: string;
+  print?: string;
+};
+
+export const ai = {
+  title: 'AI',
+  line: ['Models that read,', 'sort and recognise.'] as const,
+};
+
+export const frames: Frame[] = [
+  {
+    id: 'bench',
+    name: 'The bench',
+    date: '2023-11',
+    line: 'Coursework and experiments since the first semester at Kathmandu University.',
+    readouts: ['brain-tumour area', 'fire & smoke detection', 'autoencoders', 'DQN', 'Nepali NLP', 'optical flow'],
+    visual: 'bench',
+  },
+  {
+    id: 'phulbari',
+    name: 'Phulbari',
+    date: '2024-05',
+    line: 'Names the flower in front of the lens, one of 100 species, and waters the plant when the soil runs dry.',
+    readouts: ['ResNet-50 / VGG-16', '100 species', 'ESP32 irrigation', 'Firebase'],
+    stat: { value: '100', label: 'flower species it can name' },
+    chip: 'ICT Award 2025 · Rising Star semi-finalist',
+    keeper: true,
+    visual: 'phulbari',
+    image: '/ai/phulbari-frame.webp',
+    imageAlt: 'A red rose with rain on it, photographed through the Phulbari app.',
+    print: '/ai/phulbari-print.webp',
+  },
+  {
+    id: 'tomato-vision',
+    name: 'TomatoBot, the eyes',
+    date: '2024-12',
+    line: 'The vision half of TomatoBot: YOLOv11 tells ripe from unripe, 88% of the time in the field.',
+    readouts: ['YOLOv11', '6 classes', '88% in the field', 'Raspberry Pi'],
+    stat: { value: '88%', label: 'ripeness detection, in the field' },
+    chip: 'Published · IJICTDC 2026',
+    keeper: true,
+    visual: 'tomato-vision',
+  },
+  {
+    id: 'doclipi',
+    name: 'DocLipi',
+    date: '2025-05',
+    line: 'Sorts bank documents, reads Nepali and English, and answers questions about them in plain language.',
+    readouts: ['DenseNet121', 'Gemma 3 Vision', 'Nepali + English OCR', 'questions in plain language'],
+    chip: 'JavaFX desktop · FastAPI',
+    keeper: true,
+    visual: 'doclipi',
+    image: '/ai/doclipi-frame.webp',
+    imageAlt: 'The DocLipi document classifier screen: an upload panel and the categories it sorts into.',
+    print: '/ai/doclipi-print.webp',
+  },
+  {
+    id: 'recyclo',
+    name: 'Recyclo',
+    date: '2025-06',
+    line: 'Tells you what kind of waste you are holding and what you could make of it.',
+    readouts: ['Gemini', 'Next.js', 'thrift exchange', 'cleanup events'],
+    visual: 'recyclo',
+  },
+  {
+    id: 'dementiabot',
+    name: 'DementiaBot',
+    date: '2026-04',
+    line: 'Built with team DizzyBits for the Harvard Health Hackathon. Top 20.',
+    readouts: ['team DizzyBits', '2nd in the regional round'],
+    chip: 'Harvard Health Hackathon · Top 20',
+    visual: 'dementiabot',
+  },
+  {
+    id: 'risk',
+    name: 'Risk scoring',
+    date: '2026-07',
+    line: 'Scores accounts for risk from their transactions, and says why, in a ranked review queue.',
+    readouts: ['XGBoost', 'explainable scores', 'ranked review queue'],
+    chip: '2nd place · AI/ML Intelligence Hackathon 2026',
+    visual: 'risk',
+  },
+];

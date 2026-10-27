@@ -3,8 +3,8 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { gsap } from 'gsap';
 import { chapters as all } from '@/data/site';
 
-// Robotics left the tabs for its own section (Robotics.tsx); its header pill scrolls there instead
-const chapters = all.filter((c) => c.id !== 'robotics');
+// Robotics and AI left the tabs for their own sections (Robotics.tsx, Ai.tsx); their header pills scroll there instead
+const chapters = all.filter((c) => c.id !== 'robotics' && c.id !== 'ai');
 import { ease, prefersReducedMotion, scrollToTarget } from '@/engine';
 
 /** Four tall pills (the chapter index) and the panel they control. The chosen pill comes into focus. */
