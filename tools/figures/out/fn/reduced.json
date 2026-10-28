@@ -1,0 +1,11 @@
+[
+  ["wait", 500],
+  ["lines", "tools/figures/out/fn/lines-reduced.png"],
+  ["key", "Enter"],
+  ["wait", 200],
+  ["shot", "tools/figures/out/fn/reduced-1.png", ".iso-svg", 1],
+  ["key", "Enter"],
+  ["wait", 200],
+  ["shot", "tools/figures/out/fn/reduced-2.png", ".iso-svg", 2],
+  ["lines", "tools/figures/out/fn/lines-reduced-2.png"]
+]

@@ -1,0 +1,5 @@
+[
+  ["until", "document.querySelector('[data-readout]').textContent.includes('master · critical')", 20000],
+  ["wait", 250],
+  ["shot", "tools/figures/out/cards/firenet.png", ".iso-svg", 2]
+]

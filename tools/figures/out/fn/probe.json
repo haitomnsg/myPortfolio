@@ -1,0 +1,9 @@
+[
+  ["until", "document.querySelector('[data-readout]').textContent.includes('192.168')", 15000],
+  ["wait", 60],
+  ["eval", "(() => { const w = document.querySelector('[data-wifi]'); const b = w.getBBox(); return { n: w.children.length, box: [b.x, b.y, b.width, b.height].map(Math.round), op: [...w.children].map((c) => c.style.opacity) }; })()"],
+  ["shot", "tools/figures/out/fn/z-send2.png", ".iso-svg", 3, [200, 150, 200, 160]],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('master')", 12000],
+  ["eval", "(() => { const w = document.querySelector('[data-wifi]'); const b = w.getBBox(); const c = document.querySelector('[data-chirp]'); return { n: w.children.length, box: [b.x, b.y, b.width, b.height].map(Math.round), chirps: c.children.length }; })()"],
+  ["shot", "tools/figures/out/fn/z-reply.png", ".iso-svg", 3, [330, 200, 160, 120]]
+]

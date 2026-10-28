@@ -1,0 +1,15 @@
+[
+  ["wait", 400],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('gas on')", 8000],
+  ["wait", 500],
+  ["shot", "tools/figures/out/fn/z-gas.png", ".iso-svg", 4, [110, 70, 170, 170]],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('alarm')", 12000],
+  ["wait", 80],
+  ["shot", "tools/figures/out/fn/z-alarm.png", ".iso-svg", 4, [110, 150, 200, 140]],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('192.168')", 12000],
+  ["wait", 120],
+  ["shot", "tools/figures/out/fn/z-send.png", ".iso-svg", 4, [180, 170, 140, 110]],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('master')", 12000],
+  ["wait", 150],
+  ["shot", "tools/figures/out/fn/z-master.png", ".iso-svg", 4, [290, 230, 220, 130]]
+]

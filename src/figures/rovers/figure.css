@@ -130,3 +130,24 @@
 .rv-figure .ph-wifi { fill: none; stroke: var(--anatomy-mid); stroke-width: 0.8; stroke-linecap: round; }
 .rv-figure .ph-led { fill: #3d7bd9; stroke: #ffffff; stroke-width: 0.4; }
 .rv-figure .ph-lock { opacity: 0.45; stroke-width: 0.8; }
+/* Fig 8: the OLED's glass is the one dark face (its pixels a pale blue); the RGB LED takes the master's
+   level: green, yellow, red, in the palette's soft tints; the lighter's gas is a cool grey */
+.rv-figure .mat-glass {
+  --anatomy-paper: #253042;
+  --anatomy-top: #2e3a4e;
+  --anatomy-shade-0: #1b2433;
+  --anatomy-shade-1: #202a3a;
+  --anatomy-shade-2: #253042;
+  --anatomy-shade-3: #2a3548;
+  --anatomy-lo: #3b4a61;
+  --anatomy-faint: #34425a;
+}
+.rv-figure [data-oled] { fill: #d6e8ff; }
+.rv-figure [data-rgb] { --anatomy-paper: #eef2f6; --anatomy-top: #f7f9fb; --anatomy-shade-0: #d5dde6; --anatomy-shade-1: #dde4eb; --anatomy-shade-2: #e5eaf0; --anatomy-shade-3: #edf1f5; }
+.rv-figure [data-rgb="0"] { --anatomy-paper: #c9ecd5; --anatomy-top: #dcf4e4; --anatomy-shade-0: #9fd9b4; --anatomy-shade-1: #addfbf; --anatomy-shade-2: #bbe5ca; --anatomy-shade-3: #c6ead2; }
+.rv-figure [data-rgb="1"] { --anatomy-paper: #ffd98a; --anatomy-top: #ffe9b8; --anatomy-shade-0: #f2b74c; --anatomy-shade-1: #f6c463; --anatomy-shade-2: #fad077; --anatomy-shade-3: #fdd885; }
+.rv-figure [data-rgb="2"] { --anatomy-paper: #ffa98f; --anatomy-top: #ffc4b2; --anatomy-shade-0: #ef7455; --anatomy-shade-1: #f4866a; --anatomy-shade-2: #f8977d; --anatomy-shade-3: #fca38b; }
+.rv-figure .fn-glow { stroke: none; }
+.rv-figure .fn-gas { fill: #a9b6c7; stroke: none; }
+.rv-figure .fn-chirp { fill: none; stroke: var(--anatomy-mid); stroke-width: 0.8; }
+.rv-figure .fn-wifi { fill: none; stroke: var(--anatomy-mid); stroke-width: 1.1; stroke-linecap: round; }

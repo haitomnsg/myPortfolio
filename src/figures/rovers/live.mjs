@@ -759,3 +759,224 @@ export function mountPhulbari(stage, { k, G, M, W, data, say = (text) => void te
     stage.removeEventListener("keydown", onKey);
   };
 }
+
+// ---------------------------------------------------------------- Fig 8, the fire & smoke network
+/**
+ * The firmware's cycle, on the figure's clock (real seconds): the node sleeps 10 s, wakes, watches the
+ * MQ-2 for 2 s and keeps the peak, sounds its own buzzer first if the peak is past a threshold, joins the
+ * master's access point and sends the reading, then sleeps again. The master takes the worst level: its
+ * RGB LED turns green, yellow or red, its buzzer chirps or sounds at the firmware's cadence, and its OLED
+ * rotates through the firmware's three screens every 4 s. A click, a tap or Enter presses the lighter's
+ * lever; on its own the tour presses it every few cycles, just before the node wakes.
+ *
+ * @param {HTMLElement} stage the element holding the figure's <svg>
+ * @param {{ k: any, G: any, M: any, W: any, data: any, say?: (text: string) => void, describe?: (text: string) => void }} opts
+ * @returns {() => void} stops the figure
+ */
+export function mountFireNet(stage, { k, G, M, W, data, say = (text) => void text, describe = (text) => void text }) {
+  void G;
+  void W;
+  const svg = stage.querySelector("svg");
+  const P = data.P;
+  const at = (p) => k.iso(p, P);
+  const px = k.cameraOf(P).k; // screen px per mm
+  const gasG = svg.querySelector("[data-gas]");
+  const chirpG = svg.querySelector("[data-chirp]");
+  const wifiG = svg.querySelector("[data-wifi]");
+  const senseG = svg.querySelector("[data-sense]");
+  const oledG = svg.querySelector("[data-oled]");
+  const rgbEl = svg.querySelector("[data-rgb]");
+  const glowG = svg.querySelector("[data-glow]");
+  const leverEl = svg.querySelector("[data-lever]");
+  const GLOW = ["#7fd09c", "#ffc35c", "#ff8a6b"];
+  const LOW = ["normal", "warning", "critical"];
+
+  let clock = 0;
+  let phase = "sleep"; // sleep → watch → alarm → join → send → sleep
+  let phaseT = 0;
+  let sleepLeft = 3;
+  let puff = Infinity; // seconds since the lever went down
+  let wakes = 3; // wakes since the last puff: the tour presses the lever again after three
+  let index = 6; // the MQ-2's smoke index
+  let peak = 0;
+  let level = 0;
+  let sampleT = 0;
+  let beeps = [];
+  const master = { smoke: 6, level: 0, at: -99, beepT: 0 };
+  let sentAt = -99; // when the node's request went out: its arcs, and the master's reply, linger a moment
+  let screen = 0;
+  let screenT = 0;
+  let drawnOled = "";
+  let still = 0; // reduced motion: which still (normal, warning, critical)
+  let calmNow = false;
+
+  function readout() {
+    if (calmNow) return `smoke ${master.smoke} · ${LOW[master.level]}`;
+    if (phase === "watch") return "node awake · reading MQ-2";
+    if (phase === "alarm") return level === 2 ? `smoke ${peak} · node alarm` : `smoke ${peak} · node chirps`;
+    if (phase === "join") return "joining FireDetector";
+    if (phase === "send") return `smoke ${peak} → 192.168.4.1`;
+    const wake = `wakes in ${Math.max(1, Math.ceil(sleepLeft))} s`;
+    if (clock - master.at < 2.8) return `master · ${LOW[master.level]} · ${master.smoke}`;
+    if (M.gasAt(puff) > 0.08) return `gas on the MQ-2 · ${wake}`;
+    return `node asleep · ${wake}`;
+  }
+
+  const ringAt = (x, y, r, z, n = 40) => k.ring(x, y, r, z, P, n);
+  function draw(calm) {
+    const g = M.gasAt(puff);
+    // the lighter's gas: a jet out of the nozzle while the lever is down, then a cloud settling over the cap
+    let gas = "";
+    if (g > 0.01) {
+      const [nx, ny, nz] = data.nozzle;
+      const { x: cx, y: cy, z: cz } = data.cap;
+      if (puff < M.GAS.rise + M.GAS.hold) {
+        for (let i = 0; i < 9; i++) {
+          const s = (i + ((clock * 1.4) % 1)) / 9;
+          const p = at([nx + (cx - nx) * s, ny + (cy - ny) * s + Math.sin(i * 2.1 + clock * 3) * s * 1.6, nz + (cz + 2 - nz) * s]);
+          gas += `<circle class="fn-gas" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${((1.2 + 4.2 * s) * px).toFixed(2)}" fill-opacity="${(g * (0.46 - 0.26 * s)).toFixed(3)}"/>`;
+        }
+      }
+      for (let i = 0; i < 6; i++) {
+        const a = i * 1.047 + clock * 0.35;
+        const r = 4 + 4.5 * (1 - g) + (i % 2) * 2.5;
+        const p = at([cx + Math.cos(a) * r, cy + Math.sin(a) * r, cz + 1.5 + (i % 3)]);
+        gas += `<circle class="fn-gas" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${((4.6 + (i % 3) * 1.2) * px).toFixed(2)}" fill-opacity="${(g * 0.3).toFixed(3)}"/>`;
+      }
+    }
+    gasG.innerHTML = gas;
+    if (leverEl) leverEl.setAttribute("transform", puff < M.GAS.rise + M.GAS.hold ? `translate(${data.lever[0].toFixed(2)} ${data.lever[1].toFixed(2)})` : "");
+    // what the node senses: a ring held round the cap while it watches, one spreading each half second
+    let sense = "";
+    if (phase === "watch") {
+      const { x, y, z } = data.cap;
+      sense = `<path class="sight-mark ph-lock" d="${ringAt(x, y, 9.6, z, 48)}"/>`;
+      const t = (phaseT % 0.5) / 0.5;
+      if (!calm) sense += `<path class="sight-mark" style="opacity:${(1 - t).toFixed(3)}" d="${ringAt(x, y, 9.6 + 9 * t, z, 48)}"/>`;
+    }
+    senseG.innerHTML = sense;
+    // the buzzers: rings off the top while each sounds
+    let chirp = "";
+    const ringsOff = (b, t) => {
+      for (let i = 0; i < 2; i++) {
+        const u = (t * 2.2 + i / 2) % 1;
+        chirp += `<path class="fn-chirp" style="opacity:${(0.85 * (1 - u)).toFixed(3)}" d="${ringAt(b.x, b.y, 3 + 10 * u, b.z + 0.6, 36)}"/>`;
+      }
+    };
+    if (phase === "alarm" && beeps.some(([t0, len]) => phaseT >= t0 && phaseT < t0 + len)) ringsOff(data.buzzers[0], phaseT);
+    const beat = M.MASTER_BEEP[master.level];
+    if (beat && master.beepT % (beat.on + beat.off) < beat.on && !calm) ringsOff(data.buzzers[1], master.beepT);
+    chirpG.innerHTML = chirp;
+    // WiFi: the node's request to the master, then the master's reply back
+    let wifi = "";
+    const arcs = (o, dir, t) => {
+      for (let i = 0; i < 3; i++) {
+        const u = calm ? 0.25 + i * 0.3 : (t * 2.4 + i / 3) % 1;
+        const r = 3 + 17 * u;
+        const pts = [];
+        for (let j = 0; j <= 12; j++) {
+          const a = -0.75 + (1.5 * j) / 12;
+          pts.push(at([o[0] + dir * r * Math.cos(a), o[1], o[2] + r * Math.sin(a)]));
+        }
+        wifi += `<path class="fn-wifi" style="opacity:${(calm ? 0.7 : 1 - u).toFixed(3)}" d="${k.pathOf(pts)}"/>`;
+      }
+    };
+    const sent = clock - sentAt;
+    if ((sent >= 0 && sent < 1.1) || (calm && still > 0)) arcs(data.antennas[0], 1, sent);
+    const replied = clock - master.at;
+    if (replied >= 0 && replied < 1.1 && !calm) arcs(data.antennas[1], -1, replied);
+    wifiG.innerHTML = wifi;
+    // the master: its LED, the glow on the board under it, and the OLED's screen
+    rgbEl.setAttribute("data-rgb", String(master.level));
+    const [lx, ly] = data.led;
+    glowG.innerHTML = `<path class="fn-glow" style="fill:${GLOW[master.level]};opacity:0.34" d="${ringAt(lx, ly, 5.2, M.BT + 0.01, 32)}"/>`;
+    const key = `${screen}|${master.smoke}|${master.level}`;
+    if (key !== drawnOled) {
+      oledG.innerHTML = `<path d="${M.pixelsOf(M.screenOf(screen, master)).map(([x, y, n]) => `M${x} ${y}h${n}v1h${-n}z`).join("")}"/>`;
+      drawnOled = key;
+    }
+    say(readout());
+  }
+
+  function lever() {
+    puff = 0;
+    wakes = 0;
+    describe("The lighter's gas reaches the MQ-2.");
+  }
+  function enter(next) { phase = next; phaseT = 0; }
+  const loop = loopOf(stage, (dt, calm) => {
+    calmNow = calm;
+    if (calm) {
+      // without motion: three stills, normal, warning and critical
+      const smoke = [6, 244, 812][still];
+      peak = smoke;
+      level = still;
+      Object.assign(master, { smoke, level: still });
+      phase = "sleep";
+      sleepLeft = M.SLEEP;
+      puff = still === 2 ? 1 : Infinity;
+      screen = still;
+      clock = 99;
+      draw(true);
+      return false;
+    }
+    clock += dt;
+    phaseT += dt;
+    puff += dt;
+    master.beepT += dt;
+    screenT += dt;
+    if (screenT >= M.OLED_ROTATE) { screenT -= M.OLED_ROTATE; screen = (screen + 1) % 3; }
+    index = M.sensorStep(index, M.gasAt(puff), dt);
+    if (phase === "sleep") {
+      sleepLeft -= dt;
+      if (wakes >= 3 && sleepLeft < 2.3 && puff > 20) lever();
+      if (sleepLeft <= 0) { enter("watch"); peak = 0; sampleT = 0; wakes++; }
+    } else if (phase === "watch") {
+      sampleT -= dt;
+      if (sampleT <= 0) {
+        sampleT = 0.066;
+        peak = Math.max(peak, Math.round(Math.min(1000, Math.max(0, index + (Math.random() * 2 - 1) * M.MQ2.noise))));
+      }
+      if (phaseT >= M.WATCH) {
+        level = M.levelOf(peak);
+        beeps = M.NODE_BEEPS[level];
+        enter(level ? "alarm" : "join");
+        if (level) describe(`The node reads smoke ${peak}, ${LOW[level]}, and sounds its own buzzer before it calls the master.`);
+      }
+    } else if (phase === "alarm") {
+      const last = beeps[beeps.length - 1];
+      if (phaseT >= (last ? last[0] + last[1] + 0.2 : 0)) enter("join");
+    } else if (phase === "join") {
+      if (phaseT >= M.JOIN) { enter("send"); sentAt = clock; }
+    } else if (phase === "send" && phaseT >= M.SEND) {
+      if (master.level !== level) master.beepT = 0;
+      Object.assign(master, { smoke: peak, level, at: clock });
+      if (level === 2) describe("The master shows !! FIRE: its LED turns red and its buzzer sounds.");
+      else if (level === 1) describe("The master shows a warning: its LED turns yellow and it chirps.");
+      enter("sleep");
+      sleepLeft = M.SLEEP;
+    }
+    draw(false);
+    return true;
+  });
+  const press = () => {
+    if (loop.still.matches) {
+      still = (still + 1) % 3;
+      describe(["Clean air: the master's LED is green.", "A whiff of gas: the node chirps and the master's LED turns yellow.", "The lighter's gas: the node sounds its alarm, the master shows !! FIRE and its LED turns red."][still]);
+    } else if (puff > 1.8) lever();
+    loop.run();
+  };
+  const onKey = (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    press();
+  };
+  stage.addEventListener("pointerdown", press);
+  stage.addEventListener("keydown", onKey);
+  draw(loop.still.matches);
+  return () => {
+    loop.stop();
+    stage.removeEventListener("pointerdown", press);
+    stage.removeEventListener("keydown", onKey);
+  };
+}

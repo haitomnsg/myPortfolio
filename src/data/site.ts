@@ -111,7 +111,7 @@ export type Robot = {
   image: string;
   imageAlt: string;
   /** the live Anatomy figure the open view runs */
-  figure: 'tomatobot' | 'jeevi' | 'dementiabot' | 'phulbari' | 'face-tracker' | 'obstacle-car' | 'rescue';
+  figure: 'tomatobot' | 'jeevi' | 'dementiabot' | 'phulbari' | 'fire-network' | 'face-tracker' | 'obstacle-car' | 'rescue';
 };
 
 export const robotics = {
@@ -158,6 +158,16 @@ export const robots: Robot[] = [
     image: '/robots/phulbari.webp',
     imageAlt: 'Drawing of the Phulbari pot on a bench: a peace lily in a terracotta pot, an ESP32 and a relay on a breadboard tied to its side, and a small pump whose clear tube loops over the rim, running with water.',
     figure: 'phulbari',
+  },
+  {
+    id: 'fire-network',
+    name: 'Fire network',
+    line: 'Two units on two breadboards. A battery node sleeps 10 s between readings of smoke and heat, and a master on USB runs its own WiFi, screen and alarm.',
+    stat: { value: '0', label: 'routers, PCs or cloud services in the loop' },
+    chip: 'Embedded Systems mini project · team of four',
+    image: '/robots/fire-network.webp',
+    imageAlt: 'Drawing of the fire and smoke network on a bench: a sensor node on one breadboard with a lighter held over its smoke sensor, and a master on another whose standing screen reads !! FIRE and whose LED glows red.',
+    figure: 'fire-network',
   },
   {
     id: 'rescue-vehicle',

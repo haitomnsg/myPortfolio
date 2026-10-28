@@ -5,6 +5,7 @@ import { robotics, robots } from '@/data/site';
 import { ease, scrollToTarget } from '@/engine';
 import { DementiaBotFigure } from './figures/DementiaBotFigure';
 import { FaceTrackerFigure } from './figures/FaceTrackerFigure';
+import { FireNetFigure } from './figures/FireNetFigure';
 import { JeevIFigure } from './figures/JeevIFigure';
 import { ObstacleCarFigure } from './figures/ObstacleCarFigure';
 import { PhulbariFigure } from './figures/PhulbariFigure';
@@ -300,6 +301,7 @@ export function Robotics() {
               {live && shownRobot.figure === 'jeevi' && <JeevIFigure className="robotics__live" />}
               {live && shownRobot.figure === 'dementiabot' && <DementiaBotFigure className="robotics__live" />}
               {live && shownRobot.figure === 'phulbari' && <PhulbariFigure className="robotics__live" />}
+              {live && shownRobot.figure === 'fire-network' && <FireNetFigure className="robotics__live" />}
               {live && shownRobot.figure === 'face-tracker' && <FaceTrackerFigure className="robotics__live" />}
               {live && shownRobot.figure === 'obstacle-car' && <ObstacleCarFigure className="robotics__live" />}
               {live && shownRobot.figure === 'rescue' && <RescueFigure className="robotics__live" />}

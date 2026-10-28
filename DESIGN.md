@@ -474,6 +474,50 @@ IoT section), the sketch `IOT Code/SoilMoistureDetection.ino` (probe on GPIO 34,
 - **Not drawn.** A water reservoir: the photos show the pump strapped to the pot, dry, and the report doesn't
   say where it draws from.
 
+## 6h. Fig 8, the fire & smoke network, joins the ring (2026-10-28)
+
+Ashish asked for `D:ireSmokeDetectionNetwork` in the Robotics section: his Embedded Systems mini project, "two
+breadboards, two different units". It is the eighth robot, fifth in the ring after Phulbari. Facts come from the
+README, `docs/wiring.md` and `docs/components.md`, both `config.h` files, the firmware and the deck (PROFILE §3).
+There are no photos of the build, so the layout on the boards is the figure's own, wired to the documented pins.
+
+- **Object.** One bench, two half-size breadboards. The node (left): an ESP32-C3 Super Mini straddling the channel
+  at the end nearest the master (castellated pads, USB-C, BOOT/RST, the chip, crystal, chip antenna), an MQ-2
+  module (blue board on its header and a standoff, bakelite base, steel collar, mesh cap), a buzzer module and a
+  DHT11 module standing upright with its grille toward you; an 18650 in its holder beside the board, both leads
+  into the back rails. Signals run along the back lane as four nested Dupont arches (3V3 → DHT +, GPIO4 → DATA,
+  GPIO3 → buzzer, GPIO1 → AO) and power as low staples to the rails (+ 5 V outer, GND inner). A helping hand behind
+  the board holds a lighter over the MQ-2, the calibration's test. The master (right): a NodeMCU on its headers (the
+  ESP-12E with its antenna zigzag and can, CP2102, regulator, RST/FLASH, micro-USB) with its D pins along the front,
+  an RGB LED on four splayed legs and a 2-pin buzzer whose jumpers arch over the channel to D0, D5, D6 and D7, and
+  the SSD1306 OLED upright on a little stand in front so its screen faces you; its four leads run from female
+  shells on its header to GND, 3V3, D1 (SCL) and D2 (SDA). A USB charger behind the master powers it.
+- **Behaviour.** The firmware's cycle in real seconds: the node sleeps 10 s, wakes, watches the MQ-2 for 2 s (an
+  apricot ring held round the cap, a pulse every half second) and keeps the peak; past 120 it chirps twice, past 600
+  it sounds five beeps, before the radio comes up; then it joins `FireDetector` and sends the reading (")))" off its
+  antenna), and the master replies ("(((" off the ESP-12E). The master's LED turns green, yellow or red, its buzzer
+  keeps the firmware's cadence, and the OLED rotates the firmware's three screens every 4 s in a 5 × 7 pixel font,
+  5 px down past the panel's dead top rows (`OLED_TOP_OFFSET`): FIRE MONITOR / Nodes : 1/1 / AP IP : 192.168.4.1 /
+  the level; NODE: NODE_01 with smoke, 24.0 C, 58 %, state; and All clear. or !! FIRE / NODE_01. Click, tap or Enter
+  presses the lighter's lever: gas jets onto the cap and settles over it, and the MQ-2 rises fast and lets go slowly,
+  so one press reads critical, warning, then clean air on three wakes in a row; on its own the tour presses it every
+  three wakes, just before one. Readout: "node asleep · wakes in 7 s", "gas on the MQ-2 · wakes in 4 s", "node
+  awake · reading MQ-2", "smoke 856 · node alarm", "joining FireDetector", "smoke 856 → 192.168.4.1", "master ·
+  critical · 856". Reduced motion: three stills (normal, warning, critical), stepped with Enter. The gas's timing, the
+  MQ-2's response, the 24 °C / 58 % and the join time are the figure's own.
+- **Source.** Model `src/figures/rovers/firenet.mjs` (layout, the firmware's numbers, the gas and sensor model, the
+  OLED's screens and font), build `node tools/figures/firenet.mjs [--audit]` on `rover-lib.mjs` →
+  `public/figures/firenet.svg`, `firenet.json`, preview `tools/figures/out/firenet.html`; live code `mountFireNet` in
+  `live.mjs`; site component `FireNetFigure.tsx`; card still `public/robots/fire-network.webp`. Camera azimuth 66°, so
+  the long bench reads across the card and the OLED's face is near square to you. Staples lean 1.4 mm toward −x: in
+  the plane square to the bench they sit almost edge-on to this camera and their bends folded on screen.
+- **Verified.** `--audit` passes; `lines.mjs` reports 0 of 198 line ends floating at rest, watching, critical and under
+  reduced motion; no console errors in the preview or on the site (ring, open view, a full cycle); type-check and
+  lint clean.
+- **Not drawn.** The optional MT3608 boost converter and the web dashboard. The figure is wide (two units side by
+  side), so it fills the card's width and leaves bench in front; putting the holder in front of the node would buy
+  about 10% more scale.
+
 ## 7. Open questions for Ashish
 
 1. Hero line: "I build robots that see, and software people use." Alternatives: "Robots that

@@ -1,0 +1,7 @@
+[
+  ["until", "document.querySelector('[data-readout]').textContent.includes('reading')", 15000],
+  ["wait", 600],
+  ["lines", "tools/figures/out/fn/lines-watch.png"],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('master · critical')", 15000],
+  ["lines", "tools/figures/out/fn/lines-critical.png"]
+]

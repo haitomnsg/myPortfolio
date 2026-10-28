@@ -1,0 +1,13 @@
+[
+  ["wait", 2700],
+  ["shot", "tools/figures/out/fn/live-gas.png", ".iso-svg", 2],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('reading')", 12000],
+  ["wait", 1200],
+  ["shot", "tools/figures/out/fn/live-watch.png", ".iso-svg", 2],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('alarm')", 12000],
+  ["wait", 300],
+  ["shot", "tools/figures/out/fn/live-alarm.png", ".iso-svg", 2],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('master')", 12000],
+  ["wait", 200],
+  ["shot", "tools/figures/out/fn/live-master.png", ".iso-svg", 2]
+]
