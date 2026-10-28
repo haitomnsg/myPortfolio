@@ -584,3 +584,178 @@ export function mountDementiaBot(stage, { k, G, M, W, data, say = (text) => void
     stage.removeEventListener("keydown", onKey);
   };
 }
+
+// ---------------------------------------------------------------- Fig 7, Phulbari's pot
+/**
+ * The soil dries and the ESP32 reads the probe every so often. When a reading says dry it closes the
+ * relay: the pump runs for five seconds, water runs down the tube into the pot and the soil darkens; then
+ * the reading goes to Firebase. The peace lily droops as the soil dries and stands up again once watered.
+ * A click (or a tap, or Enter) dries the soil at once.
+ *
+ * @param {HTMLElement} stage the element holding the figure's <svg>
+ * @param {{ k: any, G: any, M: any, W: any, data: any, say?: (text: string) => void, describe?: (text: string) => void }} opts
+ * @returns {() => void} stops the figure
+ */
+export function mountPhulbari(stage, { k, G, M, W, data, say = (text) => void text, describe = (text) => void text }) {
+  void W;
+  const svg = stage.querySelector("svg");
+  const P = data.P;
+  const at = (p) => k.iso(p, P);
+  const wetG = svg.querySelector("[data-wet]");
+  const senseG = svg.querySelector("[data-sense]");
+  const wifiG = svg.querySelector("[data-wifi]");
+  const ledG = svg.querySelector("[data-led]");
+  const pumpG = svg.querySelector("[data-pump]");
+  const waters = [...svg.querySelectorAll("[data-water]")].map((el) => {
+    const [a, b, run] = el.dataset.water.split(" ").map(Number);
+    return { el, a, b, run, drawn: "" };
+  });
+  const leaves = M.LEAVES.map((spec, i) => ({ spec, el: svg.querySelector(`[data-leaf="${i}"]`), drawn: 0 }));
+  const total = data.flow.total;
+  const [ex, ey] = data.flow.end;
+  const { o: ant, t: at0, g: ag } = data.antenna;
+  const led = at(data.led);
+
+  let m = M.MOIST.start; // the soil's moisture, percent
+  let phase = "idle"; // idle → pump → drain → sync → idle
+  let phaseT = 0;
+  let readT = 0.6; // until the next reading
+  let pulse = -1; // seconds since the last reading, while its ring spreads
+  let hurry = false; // a click: the soil dries fast until a reading finds it dry
+  let front = 0; // the water's leading edge along the tube, mm
+  let tail = 0; // and its trailing edge
+  const droop = { x: 0, v: 0 };
+  let still = 0; // reduced motion: which still the figure shows (0 moist, 1 pumping, 2 watered)
+
+  function readout() {
+    const pc = `soil ${Math.round(m)}%`;
+    if (phase === "pump") return front < total ? `${pc} · dry → pump on` : `${pc} · watering`;
+    if (phase === "drain") return `${pc} · pump off`;
+    if (phase === "sync") return `${pc} · sent to Firebase`;
+    if (hurry) return `${pc} · drying`;
+    return `${pc} · ${m < M.MOIST.dry ? "dry" : "moist"}`;
+  }
+
+  // in screen units: a dash scaled by pathLength fell short of the path's ends and left seams between chunks
+  const dash = (from, to, run) => (to - from < 1e-3 ? `0 ${(run * 2).toFixed(1)}` : from <= 0 && to >= 1 ? "none" : `0 ${(from * run).toFixed(2)} ${((to - from) * run).toFixed(2)} ${(run * 2).toFixed(1)}`);
+  let drawnWet = NaN;
+  function draw(calm) {
+    // the water in the tube, chunk by chunk
+    for (const w of waters) {
+      const span = w.b - w.a;
+      const d = dash(Math.min(1, Math.max(0, (tail - w.a) / span)), Math.min(1, Math.max(0, (front - w.a) / span)), w.run);
+      if (d !== w.drawn) { w.el.setAttribute("stroke-dasharray", d); w.drawn = d; }
+    }
+    // the wet patch round the tube's end
+    const wet = Math.min(1, Math.max(0, (m - 24) / 40));
+    if (!(Math.abs(wet - drawnWet) <= 0.004)) {
+      wetG.innerHTML = wet > 0.01 ? `<path class="ph-wet" style="opacity:${(0.25 + 0.55 * wet).toFixed(3)}" d="${k.ring(ex, ey, 5 + 34 * wet, M.SOIL_Z, P, 48)}"/><path class="ph-wet" style="opacity:${(0.3 + 0.5 * wet).toFixed(3)}" d="${k.ring(ex, ey, 3 + 16 * wet, M.SOIL_Z, P, 40)}"/>` : "";
+      drawnWet = wet;
+    }
+    // the leaves
+    for (const leaf of leaves) {
+      if (!leaf.el || Math.abs(droop.x - leaf.drawn) < 0.01) continue;
+      leaf.el.innerHTML = M.leafSvgOf(k, G, P, M.leafOf(leaf.spec, droop.x).rows);
+      leaf.drawn = droop.x;
+    }
+    // what the probe senses: a ring held on the soil round it, and one spreading at each reading
+    const [px, py] = data.probe;
+    let sense = `<path class="sight-mark ph-lock" d="${k.ring(px, py, 15, M.SOIL_Z, P, 48)}"/>`;
+    if (pulse >= 0 && pulse < 0.9 && !calm) sense += `<path class="sight-mark" style="opacity:${(1 - pulse / 0.9).toFixed(3)}" d="${k.ring(px, py, 15 + 22 * pulse, M.SOIL_Z, P, 48)}"/>`;
+    senseG.innerHTML = sense;
+    // the relay's LED, lit while the relay is closed; the pump hums
+    const on = phase === "pump";
+    ledG.innerHTML = on ? `<circle class="ph-led" cx="${led[0].toFixed(1)}" cy="${led[1].toFixed(1)}" r="1.1"/>` : "";
+    if (pumpG) pumpG.setAttribute("transform", on && !calm ? `translate(${(Math.sin(phaseT * 260) * 0.22).toFixed(2)} 0)` : "");
+    // sending to Firebase: arcs off the antenna
+    let arcs = "";
+    if (phase === "sync") {
+      for (let i = 0; i < 3; i++) {
+        const t = calm ? 0.2 + i * 0.3 : (phaseT * 1.4 + i / 3) % 1;
+        const r = 5 + 16 * t;
+        const pts = [];
+        for (let j = 0; j <= 12; j++) {
+          const a = -0.7 + (1.4 * j) / 12;
+          pts.push(at([0, 1, 2].map((n) => ant[n] + at0[n] * r * Math.cos(a) + ag[n] * r * Math.sin(a))));
+        }
+        const fade = calm ? 0.7 : Math.max(0, Math.min(1, phaseT / 0.3, (1.6 - phaseT) / 0.4)) * (1 - t);
+        if (fade > 0.02) arcs += `<path class="ph-wifi" style="opacity:${fade.toFixed(3)}" d="${k.pathOf(pts)}"/>`;
+      }
+    }
+    wifiG.innerHTML = arcs;
+    say(readout());
+  }
+
+  function enter(next) { phase = next; phaseT = 0; }
+  function read() {
+    pulse = 0;
+    readT = M.READ;
+    if (phase === "idle" && m < M.MOIST.dry) {
+      hurry = false;
+      enter("pump");
+      describe(`The soil reads ${Math.round(m)}%, dry: the relay closes and the pump waters the plant.`);
+    }
+  }
+
+  const loop = loopOf(stage, (dt, calm) => {
+    if (calm) {
+      // without motion: three stills, laid out at once
+      m = [M.MOIST.start, M.MOIST.dry - 1, 62][still];
+      phase = ["idle", "pump", "sync"][still];
+      front = still === 1 ? total : 0;
+      tail = 0;
+      droop.x = M.droopAt(m);
+      draw(true);
+      return false;
+    }
+    phaseT += dt;
+    if (pulse >= 0) pulse += dt;
+    if (phase === "idle") {
+      m = Math.max(18, m - (hurry ? M.MOIST.fast : M.MOIST.rate) * dt);
+      readT -= dt;
+      if (readT <= 0 || (hurry && m < M.MOIST.dry - 1)) read();
+    } else if (phase === "pump") {
+      front = Math.min(total, front + M.FLOW * dt);
+      if (front >= total) m = Math.min(70, m + M.MOIST.gain * dt);
+      if (phaseT > M.WATER) enter("drain");
+    } else if (phase === "drain") {
+      tail = Math.min(front, tail + M.FLOW * dt);
+      if (front >= total) m = Math.min(70, m + M.MOIST.gain * dt * (1 - tail / total));
+      if (tail >= front) {
+        front = 0;
+        tail = 0;
+        enter("sync");
+        describe(`Watered: the soil reads ${Math.round(m)}%, and the reading goes to Firebase.`);
+      }
+    } else if (phase === "sync" && phaseT > 1.6) {
+      enter("idle");
+      readT = M.READ;
+    }
+    settle(droop, M.droopAt(m), dt, 0.5, false);
+    draw(false);
+    return true;
+  });
+  const dry = () => {
+    if (loop.still.matches) {
+      still = (still + 1) % 3;
+      describe(["The soil is moist; the pump is off.", "The soil reads dry: the relay closes and the pump waters the plant.", "Watered, and the reading goes to Firebase."][still]);
+    } else if (phase === "idle") {
+      hurry = true;
+      describe("The soil dries.");
+    }
+    loop.run();
+  };
+  const onKey = (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    dry();
+  };
+  stage.addEventListener("pointerdown", dry);
+  stage.addEventListener("keydown", onKey);
+  draw(loop.still.matches);
+  return () => {
+    loop.stop();
+    stage.removeEventListener("pointerdown", dry);
+    stage.removeEventListener("keydown", onKey);
+  };
+}

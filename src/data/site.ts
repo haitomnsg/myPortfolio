@@ -111,7 +111,7 @@ export type Robot = {
   image: string;
   imageAlt: string;
   /** the live Anatomy figure the open view runs */
-  figure: 'tomatobot' | 'jeevi' | 'dementiabot' | 'face-tracker' | 'obstacle-car' | 'rescue';
+  figure: 'tomatobot' | 'jeevi' | 'dementiabot' | 'phulbari' | 'face-tracker' | 'obstacle-car' | 'rescue';
 };
 
 export const robotics = {
@@ -148,6 +148,16 @@ export const robots: Robot[] = [
     image: '/robots/dementiabot.webp',
     imageAlt: 'Drawing of DementiaBot on a bench: a white board on four wheels carrying a round speaker, a webcam on a Raspberry Pi and a medicine box with its lid lifted, following a small figure along a rail.',
     figure: 'dementiabot',
+  },
+  {
+    id: 'phulbari',
+    name: 'Phulbari',
+    line: 'A pot that waters itself. An ESP32 reads a capacitive probe in the soil, and when the soil runs dry a relay runs the pump.',
+    stat: { value: 'Top 13', label: 'ICT Award 2025, Rising Star Innovation' },
+    chip: 'Syncs to Firebase · Phulbari app',
+    image: '/robots/phulbari.webp',
+    imageAlt: 'Drawing of the Phulbari pot on a bench: a peace lily in a terracotta pot, an ESP32 and a relay on a breadboard tied to its side, and a small pump whose clear tube loops over the rim, running with water.',
+    figure: 'phulbari',
   },
   {
     id: 'rescue-vehicle',

@@ -1,0 +1,8 @@
+[
+  ["until", "document.querySelector('[data-readout]').textContent.includes('dry → pump on')", 20000],
+  ["shot", "tools/figures/out/ph/pose-dry.png", ".iso-svg", 2],
+  ["lines", "tools/figures/out/ph/lines-dry.png"],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('Firebase')", 20000],
+  ["lines", "tools/figures/out/ph/lines-sync.png"],
+  ["shot", "tools/figures/out/ph/pose-sync.png", ".iso-svg", 4, [240, 250, 120, 110]]
+]

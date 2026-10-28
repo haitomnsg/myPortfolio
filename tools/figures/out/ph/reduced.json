@@ -1,0 +1,11 @@
+[
+  ["wait", 800],
+  ["eval", "document.querySelector('[data-readout]').textContent"],
+  ["key", "Enter", ".iso-stage"],
+  ["wait", 300],
+  ["shot", "tools/figures/out/ph/reduced-1.png", ".iso-svg", 1],
+  ["lines", "tools/figures/out/ph/lines-reduced.png"],
+  ["key", "Enter", ".iso-stage"],
+  ["wait", 300],
+  ["eval", "document.querySelector('[data-readout]').textContent"]
+]

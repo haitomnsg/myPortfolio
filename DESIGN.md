@@ -435,6 +435,45 @@ Anatomy figure over Hairline so it matches the other five, and confirmed the SG9
 - **Not drawn.** A walking cane for the figure (every placement put its tip on the body's outline) and the
   L298N, which the photos don't show.
 
+## 6g. Fig 7, Phulbari's pot, joins the ring (2026-10-28)
+
+Ashish asked for `D:\ProjectApple` in the Robotics section. That folder is Phulbari: the flower classifier
+(already an AI frame) and its IoT half, the pot that waters itself. The pot is now the seventh robot, fourth
+in the ring after DementiaBot. Facts come from the defense report and short paper (ESP32, capacitive soil
+moisture sensor, relay module, DC water motor, readings and watering events to Firebase, shown in the app's
+IoT section), the sketch `IOT Code/SoilMoistureDetection.ino` (probe on GPIO 34, relay on GPIO 5, active low,
+`delay(5000)` of watering) and his photos (`inspo/robotics/phulbari-pot-*.jpg`).
+
+- **Object.** A terracotta pot (turned, a rolled lip with two ridges, drainage notches) with a peace lily (8
+  leaves: petioles, a joint, blades that arch and droop, from photo 1), a capacitive probe with its taped
+  head and JST plug, and against the pot a 400-tie breadboard carrying the ESP32 DevKit (headers, WROOM module
+  and antenna, USB, EN/BOOT, regulator, UART chip, power LED) and the relay module (relay, screw terminal,
+  pins, LEDs). A small white pump stands beside it (photos 2 and 3); its clear tube loops over the rim into
+  the soil, taped at the end. A twisted pair ties the board and pump to the pot (photo 1's orange wire,
+  drawn instead of photos 2–3's black strap, which a cable draws better). The probe's lead runs over the rim
+  to the board, three jumpers arch from beside the ESP32 to the relay's pins, the pump's lead runs round the
+  pot's foot to the terminal, and a USB lead runs to a power bank on the bench.
+- **Behaviour.** The soil dries; every 1.5 s the ESP32 reads the probe (an apricot ring spreads over the soil
+  round it). Below 30% the relay closes (its LED lights, the pump hums) for the sketch's 5 s: water runs down
+  the tube, the soil darkens round its end and the reading climbs to about 62%; the tube drains, arcs leave
+  the antenna and the readout says "sent to Firebase". The peace lily droops as the soil dries and stands up
+  once watered. Click, tap or Enter dries the soil at once. Readout: "soil 41% · moist", "soil 29% · dry →
+  pump on", "soil 50% · watering", "soil 62% · sent to Firebase". Reduced motion: three stills (moist,
+  pumping, watered), stepped with Enter. The 30% threshold is the figure's own: the report only says
+  "a predefined threshold".
+- **Source.** Model `src/figures/rovers/phulbari.mjs` (pot, frames on its slope, leaves and their droop, the
+  tube's route), build `node tools/figures/phulbari.mjs [--audit]` on `rover-lib.mjs` →
+  `public/figures/phulbari.svg`, `phulbari.json`, preview `tools/figures/out/phulbari.html`; live code
+  `mountPhulbari` in `live.mjs`; site component `PhulbariFigure.tsx`; card still `public/robots/phulbari.webp`.
+  The water is a stroke inside each tube chunk, revealed in screen units (a dash scaled by `pathLength` fell
+  short of the path's ends and left seams); the outlet is a pad met to the pump body by bisecting its shape
+  (the Raptor's `padOn`), set 4 mm in front of the pump's axis so it leaves the body on the side you see.
+- **Verified.** `--audit` passes; `lines.mjs` reports 0 of 276 line ends floating at rest, drooped, syncing
+  and under reduced motion; no console errors in the preview or on the site (ring, open view, a full watering);
+  type-check and lint clean.
+- **Not drawn.** A water reservoir: the photos show the pump strapped to the pot, dry, and the report doesn't
+  say where it draws from.
+
 ## 7. Open questions for Ashish
 
 1. Hero line: "I build robots that see, and software people use." Alternatives: "Robots that

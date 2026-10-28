@@ -1,0 +1,5 @@
+[
+  ["until", "document.querySelector('[data-readout]').textContent.includes('watering')", 20000],
+  ["wait", 2600],
+  ["shot", "tools/figures/out/cards/phulbari.png", ".iso-svg", 2]
+]

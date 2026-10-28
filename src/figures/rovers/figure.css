@@ -87,3 +87,46 @@
 .rv-figure .db-wall[data-face="side"] { fill: var(--anatomy-shade-0); }
 .rv-figure .db-shelf { fill: var(--anatomy-shade-2); stroke: var(--anatomy-lo); stroke-width: 0.5; }
 .rv-figure .db-voice { fill: none; stroke: var(--anatomy-mid); stroke-width: 0.9; }
+/* Fig 7: the pot's terracotta and the twisted pair are warm papers; the leaves a cool green-grey; the
+   clear tube a pale glass, and the water in it the palette's blue */
+.rv-figure .mat-clay {
+  --anatomy-paper: #f7e6dc;
+  --anatomy-top: #fbefe8;
+  --anatomy-shade-0: #e6c9b8;
+  --anatomy-shade-1: #ecd4c6;
+  --anatomy-shade-2: #f1ddd1;
+  --anatomy-shade-3: #f5e4da;
+  --anatomy-lo: #c9a491;
+  --anatomy-faint: #e0c3b3;
+}
+.rv-figure .mat-wire {
+  --anatomy-paper: #f6e3d3;
+  --anatomy-top: #fbeee3;
+  --anatomy-shade-0: #e2c2a8;
+  --anatomy-shade-1: #e8cdb6;
+  --anatomy-shade-2: #eed8c5;
+  --anatomy-lo: #c19b7c;
+  --anatomy-mid: #9a7a62;
+}
+.rv-figure .mat-leaf {
+  --anatomy-paper: #edf3ef;
+  --anatomy-top: #f4f8f5;
+  --anatomy-shade-0: #cfdcd4;
+  --anatomy-shade-1: #d8e3dc;
+  --anatomy-shade-2: #e1eae4;
+  --anatomy-shade-3: #e9f0eb;
+  --anatomy-lo: #9fb3a7;
+  --anatomy-faint: #c3d2c8;
+}
+.rv-figure .mat-tube {
+  --anatomy-shade-2: #eef3f8;
+  --anatomy-top: #ffffff;
+  --anatomy-shade-0: #dbe4ee;
+}
+.rv-figure .ph-wall { fill: var(--anatomy-shade-1); }
+.rv-figure .ph-soil { fill: #d9e1eb; stroke: var(--anatomy-lo); stroke-width: 0.4; }
+.rv-figure .ph-wet { fill: #b9c8da; }
+.rv-figure .ph-water { fill: none; stroke: #9cc3ea; stroke-width: 3.2; stroke-linecap: butt; }
+.rv-figure .ph-wifi { fill: none; stroke: var(--anatomy-mid); stroke-width: 0.8; stroke-linecap: round; }
+.rv-figure .ph-led { fill: #3d7bd9; stroke: #ffffff; stroke-width: 0.4; }
+.rv-figure .ph-lock { opacity: 0.45; stroke-width: 0.8; }

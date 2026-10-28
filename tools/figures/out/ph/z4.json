@@ -1,0 +1,9 @@
+[
+  ["until", "document.querySelector('[data-readout]').textContent.includes('watering')", 20000],
+  ["wait", 1200],
+  ["shot", "tools/figures/out/ph/z-relay.png", ".iso-svg", 4, [255, 330, 110, 85]],
+  ["shot", "tools/figures/out/ph/z-pump.png", ".iso-svg", 4, [130, 250, 90, 90]],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('Firebase')", 20000],
+  ["wait", 250],
+  ["shot", "tools/figures/out/ph/z-wifi.png", ".iso-svg", 4, [250, 300, 110, 80]]
+]

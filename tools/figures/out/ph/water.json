@@ -1,0 +1,8 @@
+[
+  ["until", "document.querySelector('[data-readout]').textContent.includes('watering')", 20000],
+  ["wait", 1500],
+  ["shot", "tools/figures/out/ph/watering.png", ".iso-svg", 3, [60, 80, 300, 220]],
+  ["until", "document.querySelector('[data-readout]').textContent.includes('Firebase')", 20000],
+  ["wait", 300],
+  ["shot", "tools/figures/out/ph/sync.png", ".iso-svg", 3, [180, 130, 220, 220]]
+]
