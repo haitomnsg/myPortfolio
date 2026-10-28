@@ -518,6 +518,30 @@ There are no photos of the build, so the layout on the boards is the figure's ow
   side), so it fills the card's width and leaves bench in front; putting the holder in front of the node would buy
   about 10% more scale.
 
+## 6i. AI reel, pass 2 (2026-10-28)
+
+Ashish's review of chapter 02: the heading to the right like Robotics, Robotics' blue at the top but moving, the
+"hover holds a frame · click prints it" hint gone, and no dimming or blur on the frames that are not in the middle.
+More projects are coming (5 to 6 at least); the reel takes any count of two or more.
+
+- **Heading.** On the right margin line, bracket in the right corner, the same top and inks as `.robotics__head`
+  (index, title ink and line all end at the margin line). Phones and reduced motion keep it on the left, as Robotics.
+- **Sky.** `src/components/Sky.tsx`: a WebGL fragment shader drawn at a quarter of the CSS size and stretched. It is
+  Robotics' stage gradient (#6790c6 → #8db2de → #bcd5ef → field-hi → paper) whose horizon is pushed up and down by
+  two octaves of domain-warped simplex noise; where the noise runs deep the blue reaches lower and darkens toward
+  #416aaa, where it thins it clears to a white sheen. One sign for all three, or the clouds grow halos. It drifts
+  left with the film at about 30 px/s and reforms over ten seconds or so. It runs only on screen, draws one still
+  frame under reduced motion, and fades in over a still copy of the Robotics gradient (the section's background),
+  which stays if WebGL is missing.
+- **Film.** Every frame at full strength; only the edge print brightens on the frame at the middle, so the caption
+  still points at one. The holes are punched through the stock with a mask, so the page shows through them. Cards butt
+  edge to edge, so Ai.tsx snaps the gap to an even pixel and the card's pitch to a multiple of six (one per hole):
+  fractional widths left a hairline at every join. The strip's shadow is a still box-shadow instead of a drop-shadow
+  filter that was redrawn every frame. Hover shows Robotics' blue arrow disc in the frame's corner; on phones it shows
+  always, smaller.
+- **Not changed.** Click still prints the frame; the caption still sits bottom left. The edge from Robotics' paper floor
+  to the AI sky is a straight cut, passed in the 1.1 s handoff glide.
+
 ## 7. Open questions for Ashish
 
 1. Hero line: "I build robots that see, and software people use." Alternatives: "Robots that

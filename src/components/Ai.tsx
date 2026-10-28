@@ -4,13 +4,15 @@ import { gsap } from 'gsap';
 import { ai, frames } from '@/data/site';
 import { ease, scrollState } from '@/engine';
 import { FrameVisual } from './figures/AiVisuals';
+import { Sky } from './Sky';
 import './ai.css';
 
 // Chapter 02, the reel (docs/SHOWCASE_CONCEPTS.md §4): every AI project is a frame on one roll of
-// film, in time order. The whole strip runs, holes, frames and edge print together, on its own once
-// the section is on screen; scrolling nudges it along. The frame at the middle of the screen is lit,
-// the rest sit darker. Hover holds the film and lights the frame under the pointer; click prints it.
-// The frames are sized from the band's height, so the section fills one screen exactly.
+// film, in time order, under a slow moving sky. The whole strip runs, holes, frames and edge print
+// together, on its own once the section is on screen; scrolling nudges it along. Every frame shows
+// as it is; only the edge print of the frame at the middle brightens, and the caption names it.
+// Hover holds the film on the frame under the pointer; click prints it. The frames are sized from
+// the band's height, so the section fills one screen exactly.
 
 const N = frames.length;
 const COPIES = 4; // the roll repeats, so it never runs out
@@ -59,7 +61,15 @@ export function Ai() {
   useEffect(() => {
     if (mode !== 'film') {
       cards.current.forEach((el) => el?.style.setProperty('--focus', '1'));
-      return;
+      // the swiped strip's frames, on whole pixels too
+      const size = () => {
+        const fw = Math.floor((Math.min(innerWidth * 0.72, 340) + 14) / 6) * 6 - 14;
+        section.current?.style.setProperty('--gap', '14px');
+        section.current?.style.setProperty('--fw', `${fw}px`);
+      };
+      size();
+      addEventListener('resize', size);
+      return () => removeEventListener('resize', size);
     }
     let raf = 0;
     let visible = false;
@@ -76,9 +86,14 @@ export function Ai() {
       const b = cards.current[1];
       const bd = band.current;
       if (!c || !a || !b || !bd || !section.current) return;
-      // the image takes the band's height less the strip's own rows, at most 42% of the width
+      // the image takes the band's height less the strip's own rows, at most 42% of the width. The
+      // frames butt edge to edge, so the gap and the six holes' pitch land on whole pixels, or each
+      // join would show a hairline
       const pad = parseFloat(getComputedStyle(bd).paddingTop) * 2;
-      const fw = Math.round(Math.max(180, Math.min((bd.clientHeight - pad - FILM_Y) * 1.2, bd.clientWidth * 0.42)));
+      const gap = 2 * Math.round(Math.min(22, Math.max(14, innerWidth * 0.013)) / 2);
+      const raw = Math.max(180, Math.min((bd.clientHeight - pad - FILM_Y) * 1.2, bd.clientWidth * 0.42));
+      const fw = Math.floor((raw + gap) / 6) * 6 - gap;
+      section.current.style.setProperty('--gap', `${gap}px`);
       section.current.style.setProperty('--fw', `${fw}px`);
       geo.w = c.clientWidth;
       geo.fw = a.offsetWidth;
@@ -105,7 +120,7 @@ export function Ai() {
       // the light glides to the held frame, or back to the middle
       const lwant = h?.by === 'pointer' ? h.k * pitch + fw / 2 - off : h?.by === 'focus' ? (N + h.i) * pitch + fw / 2 - off : w / 2;
       lx += (lwant - lx) * (1 - Math.exp(-dt * 9));
-      // every frame on screen: lit at the light, darker away from it; the frames never change size
+      // the edge print brightens under the light; the frames themselves never change
       let near = -1;
       let nd = Infinity;
       cards.current.forEach((el, k) => {
@@ -203,6 +218,7 @@ export function Ai() {
       aria-labelledby="ai-title"
       onKeyDown={onKey}
     >
+      <Sky className="ai__sky" />
       <header className="ai__head">
         <p className="ai__index"><span className="ai__bracket" aria-hidden="true" />02 / 03</p>
         <h2 id="ai-title" className="ai__title">{ai.title}</h2>
@@ -226,7 +242,7 @@ export function Ai() {
                         onClick={() => choose(k)}
                         onFocus={() => { if (mode === 'film') focusHold.current = i; }}
                         onBlur={() => { if (focusHold.current === i) focusHold.current = null; }}
-                        aria-label={`Print ${f.name}`}
+                        aria-label={`Open ${f.name}`}
                         tabIndex={copies > 1 && c !== 1 ? -1 : 0}
                         style={{ '--focus': 0 } as CSSProperties}
                       >
@@ -240,6 +256,10 @@ export function Ai() {
                               <path d="M46 72C70 26 180 10 246 34c62 22 56 112 28 160-30 52-150 62-214 30C-6 190 4 110 72 60" />
                             </svg>
                           )}
+                          {/* the Robotics open button's arrow disc, shown on the frame under the pointer */}
+                          <span className="fcard__open" aria-hidden="true">
+                            <svg viewBox="0 0 12 12" width="12" height="12"><path d="M3 9 9 3M4 3h5v5" /></svg>
+                          </span>
                         </span>
                         {/* the edge print: frame number, name and date, printed on the film itself */}
                         <span className="fcard__edge"><b>▸ {two(i)}</b><span>{f.name}</span><span>{f.date}</span></span>
@@ -254,9 +274,9 @@ export function Ai() {
         </div>
       </div>
 
-      <div className="ai__foot">
-        {/* the lit frame, from the left margin */}
-        {mode === 'film' && (
+      {/* the frame at the middle, from the left margin */}
+      {mode === 'film' && (
+        <div className="ai__foot">
           <div className="ai__cap" aria-live="polite">
             {frames.map((f, i) => (
               <div key={f.id} className="ai__capItem" data-active={i === shown ? '' : undefined} aria-hidden={i !== shown} inert={i !== shown}>
@@ -266,9 +286,8 @@ export function Ai() {
               </div>
             ))}
           </div>
-        )}
-        <p className="ai__hint"><span className="ai__mouse" aria-hidden="true" />{mode === 'film' ? 'Hover holds a frame · click prints it' : 'Swipe the film · tap a frame to print it'}</p>
-      </div>
+        </div>
+      )}
 
       {open !== null && (
         <div className="ai__print" role="dialog" aria-modal="false" aria-labelledby="ai-print-name">
