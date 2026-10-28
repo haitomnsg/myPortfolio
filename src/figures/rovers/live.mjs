@@ -431,3 +431,156 @@ export function mountRescue(stage, { k, G, M, W, data, say = (text) => void text
     stage.removeEventListener("keydown", onKey);
   };
 }
+
+// ---------------------------------------------------------------- Fig 6, DementiaBot
+/**
+ * The person rides the rail under the pointer and the robot follows at its distance, a little behind,
+ * with the camera's focus box on them. A click (or a tap on the robot, or Enter) is a medicine reminder:
+ * the speaker sounds and the servo lifts the medicine box's lid, then lowers it.
+ *
+ * @param {HTMLElement} stage the element holding the figure's <svg>
+ * @param {{ k: any, G: any, M: any, W: any, data: any, say?: (text: string) => void, describe?: (text: string) => void }} opts
+ * @returns {() => void} stops the figure
+ */
+export function mountDementiaBot(stage, { k, G, M, W, data, say = (text) => void text, describe = (text) => void text }) {
+  const svg = stage.querySelector("svg");
+  const P = data.P;
+  const botG = svg.querySelector("[data-bot]");
+  const lidG = svg.querySelector("[data-lid]");
+  const voiceG = svg.querySelector("[data-voice]");
+  const sightG = svg.querySelector("[data-sight]");
+  const focusG = svg.querySelector("[data-focus]");
+  const personG = svg.querySelector("[data-person]");
+  const wheels = wheelsOf(svg, { k, G, W, data });
+  const at = (p) => k.iso(p, P);
+  const bumper = M.DECK.x + M.DECK.w;
+
+  const person = { x: M.FOLLOW, v: 0 };
+  const bot = { x: 0, v: 0 };
+  const lid = { x: 0, v: 0 }; // the servo, degrees
+  let want = M.FOLLOW;
+  let steering = false;
+  let idle = 0;
+  let tourAt = 0;
+  let tourT = 0;
+  let fired = false;
+  // a stop on the person's walk, how long it lasts, and whether a reminder falls due there
+  const TOUR = [[200, 3.2, false], [286, 3.4, false], [286, 4.6, true], [166, 3.4, false], [244, 3.2, false]];
+  let remind = -1; // seconds into a reminder, or -1
+  let held = false; // reduced motion: the reminder stands until it is dismissed
+  const REMIND = 4.2;
+
+  function readout() {
+    if (lid.x > M.OPEN * 0.8) return "medicine reminder · lid open";
+    if (remind >= 0 || held) return "medicine reminder · speaking";
+    if (lid.x > 1) return "lid closing";
+    const gap = Math.round(person.x - bot.x - bumper - M.BASE.r);
+    const err = person.x - M.FOLLOW - bot.x;
+    const end = Math.abs(bot.x) > M.TRAVEL - 0.5 && Math.abs(person.x - M.FOLLOW) > M.TRAVEL && Math.abs(bot.v) < 1;
+    if (end) return `person · ${gap} mm ahead · end of travel`;
+    if (Math.abs(err) < 2) return `person · ${gap} mm ahead · holding`;
+    return `person · ${gap} mm ahead · ${err > 0 ? "following" : "keeping distance"}`;
+  }
+
+  let drawnBot = NaN;
+  let drawnPerson = NaN;
+  let drawnLid = NaN;
+  function draw(calm) {
+    if (bot.x !== drawnBot) {
+      botG.setAttribute("transform", k.translateAlong(P, [bot.x, 0, 0]));
+      for (const wh of wheels) wh.turn(-bot.x / wh.r);
+      drawnBot = bot.x;
+    }
+    if (person.x !== drawnPerson) {
+      personG.setAttribute("transform", k.translateAlong(P, [person.x - M.FOLLOW, 0, 0]));
+      drawnPerson = person.x;
+    }
+    if (!(Math.abs(lid.x - drawnLid) <= 0.05)) {
+      lidG.innerHTML = M.lidOf(k, G, P, lid.x).map((p) => M.pieceSvgOf(k, p)).join("");
+      drawnLid = lid.x;
+    }
+    // the voice: rings spreading off the speaker's top while it speaks
+    const S = M.SPEAKER;
+    const ringAt = (t, opacity) => `<path class="db-voice" style="opacity:${opacity.toFixed(3)}" d="${k.ring(S.x, S.y, S.r * (0.6 + t * 0.7), M.SPEAKER_TOP + 0.2, P, 64)}"/>`;
+    let rings = "";
+    if (held && calm) rings = ringAt(0.3, 0.6) + ringAt(0.65, 0.35);
+    else if (remind >= 0) {
+      const env = Math.min(1, remind / 0.25, (REMIND - 0.4 - remind) / 0.5);
+      for (let i = 0; i < 3 && env > 0; i++) {
+        const t = (remind * 0.9 + i / 3) % 1;
+        rings += ringAt(t, env * (1 - t * t));
+      }
+    }
+    voiceG.innerHTML = rings;
+    // the camera's sight on the person, and its box closing as the robot catches up
+    const err = person.x - M.FOLLOW - bot.x;
+    const px = person.x;
+    sightG.innerHTML = `<path class="sight-line" d="${k.pathOf([at([M.LENS[0] + bot.x, M.LENS[1], M.LENS[2]]), at([px, 0, M.PERSON_Z + 62])])}"/>`;
+    const pad = 3 + Math.min(10, Math.abs(err) * 0.18);
+    const y0 = -20 - pad;
+    const y1 = 20 + pad;
+    const z0 = M.PERSON_Z - 4 - pad;
+    const z1 = M.HEAD.z + M.HEAD.r + pad;
+    const corner = (y, z, dy, dz) => k.pathOf([at([px, y, z + dz * 11]), at([px, y, z]), at([px, y + dy * 9, z])]);
+    focusG.innerHTML = `<path class="sight-mark" d="${[corner(y0, z0, 1, 1), corner(y1, z0, -1, 1), corner(y0, z1, 1, -1), corner(y1, z1, -1, -1)].join("")}"/>`;
+    say(readout());
+  }
+
+  const loop = loopOf(stage, (dt, calm) => {
+    if (!steering) {
+      tourT += dt;
+      const [x, hold, due] = TOUR[tourAt];
+      want = x;
+      // a reminder falls due once the robot has pulled up behind the person
+      if (due && !fired && tourT > 1.4) { fired = true; if (remind < 0) remind = 0; }
+      if (tourT > hold) { tourT = 0; tourAt = (tourAt + 1) % TOUR.length; fired = false; }
+    } else if ((idle += dt) > 3.2 && remind < 0) { steering = false; tourT = 0; }
+    settle(person, want, dt, 0.4, calm, 140);
+    settle(bot, Math.max(-M.TRAVEL, Math.min(M.TRAVEL, person.x - M.FOLLOW)), dt, 0.22, calm, 200);
+    if (remind >= 0) { remind += dt; if (remind > REMIND) remind = -1; }
+    const open = calm ? held : remind >= 0.35 && remind < REMIND - 0.9;
+    settle(lid, open ? M.OPEN : 0, dt, 0.14, calm, 280);
+    draw(calm);
+    return true;
+  });
+  const remindNow = () => {
+    if (loop.still.matches) held = !held;
+    else if (remind < 0) remind = 0;
+    describe(held || remind >= 0 ? "Medicine reminder: the speaker sounds and the servo lifts the lid of the medicine box." : "The medicine box is closed.");
+    loop.run();
+  };
+  const aim = (x) => {
+    want = Math.max(M.PERSON.min, Math.min(M.PERSON.max, x));
+    steering = true;
+    idle = 0;
+    loop.run();
+  };
+  // the bench runs left to right on screen; the person's walk spans the drawing's middle
+  const fromPointer = (event) => aim(M.PERSON.min + (M.PERSON.max - M.PERSON.min) * shareOf(svg, event, 0.3));
+  const onMove = (event) => { if (event.pointerType === "mouse") fromPointer(event); };
+  // a click anywhere, or a tap on the robot's half, is a reminder; a tap ahead moves the person
+  const onDown = (event) => {
+    if (event.pointerType === "mouse" || shareOf(svg, event, 0) < 0.45) remindNow();
+    else fromPointer(event);
+  };
+  const onLeave = () => { idle = 2.2; };
+  const onKey = (event) => {
+    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); remindNow(); return; }
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    aim((steering ? want : person.x) + (event.key === "ArrowRight" ? 20 : -20));
+    describe("The person moves; the robot follows at its distance.");
+  };
+  stage.addEventListener("pointermove", onMove);
+  stage.addEventListener("pointerdown", onDown);
+  stage.addEventListener("pointerleave", onLeave);
+  stage.addEventListener("keydown", onKey);
+  draw(true);
+  return () => {
+    loop.stop();
+    stage.removeEventListener("pointermove", onMove);
+    stage.removeEventListener("pointerdown", onDown);
+    stage.removeEventListener("pointerleave", onLeave);
+    stage.removeEventListener("keydown", onKey);
+  };
+}

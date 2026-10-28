@@ -406,6 +406,35 @@ in front: index, name, one line from `robots` in `src/data/site.ts`, its specs a
   stage's foot. On short screens (a 1366 × 768 laptop in a browser) the cards shrink, down to 200px,
   until the panel and its button fit.
 
+## 6f. Fig 6, DementiaBot, joins the ring (2026-10-28)
+
+Ashish's DementiaBot (Harvard Health Hackathon 2026, team DizzyBits, Top 20) is the sixth robot, third in
+the ring after TomatoBot. Facts come from the proposal and decks in `D:\HarwardHealth` and his photos
+(`inspo/robotics/DSC01870.JPG` the full robot, `DSC01952.JPG` the front); PROFILE §3 has them. He chose an
+Anatomy figure over Hairline so it matches the other five, and confirmed the SG90 lifts the medicine box's lid.
+
+- **Object.** The robot as photographed: a white board on four TT gear motors, a power bank with a round
+  fabric speaker on it, the white medicine box (a label with a cross, an SG90 in its near wall whose horn
+  carries the lid), a Raspberry Pi case (vents, GPIO connector, Ethernet and USB ports) with the USB webcam
+  on its clip, and a four-cell battery box with its switch and lead into the deck. In front, a peg figure
+  with arms stands in for the patient on a carriage that runs along a rail with a ruler beside it.
+- **Behaviour.** The pointer walks the figure along the rail; the robot follows at its distance with a lag
+  (the decks' EMA smoothing), wheels turning, the camera's sight line and focus box on the figure, and
+  stops at the end of its travel. Click, Enter, a tap on the robot, or a stop on the tour is a medicine
+  reminder: rings spread off the speaker and the servo lifts the lid (104°), showing a shelf with two
+  capsules inside, then lowers it. Readout: "person · 76 mm ahead · holding / following / end of travel",
+  "medicine reminder · speaking / lid open". Reduced motion: no tour, Enter toggles the lid at once.
+- **Source.** Model `src/figures/rovers/dementiabot.mjs` (sizes and `lidOf`, rebuilt per frame), build
+  `node tools/figures/dementiabot.mjs [--audit]` on `rover-lib.mjs` → `public/figures/dementiabot.svg`,
+  `dementiabot.json`, preview `tools/figures/out/dementiabot.html`; live code `mountDementiaBot` in
+  `live.mjs`; site component `DementiaBotFigure.tsx`; card still `public/robots/dementiabot.webp`.
+  The build wraps `wire` so its end dots sit 0.8/scale − 0.4 out of their mounts: at this figure's
+  smaller scale the shared 0.12 offset sank them past the audit's limit.
+- **Verified.** `--audit` passes, `lines.mjs` reports 0 of 354 line ends floating, no console errors in
+  the preview or on the site (ring, open view, lid open), type-check clean.
+- **Not drawn.** A walking cane for the figure (every placement put its tip on the body's outline) and the
+  L298N, which the photos don't show.
+
 ## 7. Open questions for Ashish
 
 1. Hero line: "I build robots that see, and software people use." Alternatives: "Robots that

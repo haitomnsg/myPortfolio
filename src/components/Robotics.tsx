@@ -3,6 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProp
 import { gsap } from 'gsap';
 import { robotics, robots } from '@/data/site';
 import { ease, scrollToTarget } from '@/engine';
+import { DementiaBotFigure } from './figures/DementiaBotFigure';
 import { FaceTrackerFigure } from './figures/FaceTrackerFigure';
 import { JeevIFigure } from './figures/JeevIFigure';
 import { ObstacleCarFigure } from './figures/ObstacleCarFigure';
@@ -18,7 +19,7 @@ import './robotics.css';
 
 const N = robots.length;
 const STEP = 0.7; // screens of scroll per robot
-const ARC = 0.74; // radians between neighbouring cards: five robots span the half circle
+const ARC = 0.74; // radians between neighbouring cards: five span the half circle, a sixth waits hidden below
 const smooth = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);
@@ -296,6 +297,7 @@ export function Robotics() {
               <img className="robotics__still" src={shownRobot.image} alt="" />
               {live && shownRobot.figure === 'tomatobot' && <TomatoBotFigure className="robotics__live" />}
               {live && shownRobot.figure === 'jeevi' && <JeevIFigure className="robotics__live" />}
+              {live && shownRobot.figure === 'dementiabot' && <DementiaBotFigure className="robotics__live" />}
               {live && shownRobot.figure === 'face-tracker' && <FaceTrackerFigure className="robotics__live" />}
               {live && shownRobot.figure === 'obstacle-car' && <ObstacleCarFigure className="robotics__live" />}
               {live && shownRobot.figure === 'rescue' && <RescueFigure className="robotics__live" />}

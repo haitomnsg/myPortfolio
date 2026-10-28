@@ -111,7 +111,7 @@ export type Robot = {
   image: string;
   imageAlt: string;
   /** the live Anatomy figure the open view runs */
-  figure: 'tomatobot' | 'jeevi' | 'face-tracker' | 'obstacle-car' | 'rescue';
+  figure: 'tomatobot' | 'jeevi' | 'dementiabot' | 'face-tracker' | 'obstacle-car' | 'rescue';
 };
 
 export const robotics = {
@@ -138,6 +138,16 @@ export const robots: Robot[] = [
     image: '/robots/tomatobot.webp',
     imageAlt: 'Drawing of TomatoBot v2 beside a row of staked tomato plants, its arm reaching for a ripe tomato.',
     figure: 'tomatobot',
+  },
+  {
+    id: 'dementiabot',
+    name: 'DementiaBot',
+    line: 'Follows a person with dementia around the home, keeps them company, and opens their medicine box when a dose is due.',
+    stat: { value: 'Top 20', label: 'Harvard Health Hackathon 2026' },
+    chip: '2nd in the regional round · team DizzyBits',
+    image: '/robots/dementiabot.webp',
+    imageAlt: 'Drawing of DementiaBot on a bench: a white board on four wheels carrying a round speaker, a webcam on a Raspberry Pi and a medicine box with its lid lifted, following a small figure along a rail.',
+    figure: 'dementiabot',
   },
   {
     id: 'rescue-vehicle',

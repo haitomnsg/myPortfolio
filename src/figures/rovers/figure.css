@@ -81,3 +81,9 @@
 .rv-figure .sonar-arc { fill: none; stroke: var(--rv-signal); stroke-width: 0.6; opacity: 0.65; }
 .rv-figure .sonar[data-clear] { fill: rgb(255 143 77 / 0.06); stroke-opacity: 0.35; }
 .rv-figure .rv-blur { fill: var(--anatomy-shade-1); stroke: var(--anatomy-lo); stroke-width: 0.4; }
+/* Fig 6: inside the medicine box, and the speaker's voice */
+.rv-figure .db-void { fill: var(--anatomy-shade-0); }
+.rv-figure .db-wall[data-face="back"] { fill: var(--anatomy-shade-1); }
+.rv-figure .db-wall[data-face="side"] { fill: var(--anatomy-shade-0); }
+.rv-figure .db-shelf { fill: var(--anatomy-shade-2); stroke: var(--anatomy-lo); stroke-width: 0.5; }
+.rv-figure .db-voice { fill: none; stroke: var(--anatomy-mid); stroke-width: 0.9; }

@@ -67,6 +67,7 @@ paths intersect. ★ = worth a full "scene"; the rest are path-side artifacts.
 - ★ **TomatoBot / TomatoBot v2** — autonomous harvesting robot. YOLO (v8→v11) ripeness detection (6 classes, 88%), U-Net path segmentation, Deep Hough Transform line estimation, 6-DOF arm with inverse kinematics, Raspberry Pi, Java Android app (manual + autonomous). *Published paper.* Photo exists on current site. Tags: Robotics · AI · SW.
 - ★ **JeevI / JeevI-II ("SPDR Bot")** — 3D-printable 12-DOF quadruped, PPO locomotion policy trained in NVIDIA Isaac Lab; converged on flat (+256.27), rough (+191.83) and obstacle (+184.05) terrain. URDF/USD/STL assets exist in repo `jeevi-ii` → a real robot mesh we can show in-browser. Tags: Robotics · AI.
 - **Face & Human Tracking Robot** — Arduino + MU vision sensor; dual mode (person following / traffic-sign following). Tags: Robotics · AI.
+- **DementiaBot** (Harvard Health Hackathon 2026, team DizzyBits, Top 20; 2nd in the regional round) — a home companion robot for dementia care. It follows the patient indoors (vision-based person tracking: YOLO, ArUco markers, centroid or Kalman tracking, EMA smoothing), gives voice medicine reminders and simple AI conversation through a speaker, and an SG90 servo lifts the lid of its medicine box at reminder time; a Guardian Android app (Kotlin) keeps caregivers informed. Raspberry Pi 4, USB webcam, L298N motor driver, ultrasonic stop logic, four TT gear motors on a white board, a power bank and a battery box. Ashish was the hardware & robotics lead. Source: the proposal and pitch decks (D:\HarwardHealth) and his photos in `inspo/robotics/` (DSC01870, DSC01952), 2026-10-28. Assistive care and reminders, not diagnosis. Tags: Robotics · AI · SW.
 - **Multi-Utility Disaster Rescue Vehicle** — Arduino, robotic arm, drone, fire suppression, camera. Tags: Robotics.
 - **Arduino Obstacle-Avoiding Car** — ultrasonic scan-and-choose navigation (early work). Tags: Robotics.
 - **Vacuum-cleaner robot** (AAVISHKAR 2023, 24 h build). Tags: Robotics.
@@ -76,7 +77,7 @@ paths intersect. ★ = worth a full "scene"; the rest are path-side artifacts.
 - ★ **DocLipi** — bank document classifier + Nepali/English OCR + person-wise grouping + natural-language SQL querying. DenseNet121, Gemma 3 Vision, JavaFX desktop + FastAPI. Screenshots exist. Tags: AI · SW.
 - ★ **Phulbari** — 100-species flower CNN (ResNet-50 / VGG-16), care tips, disease detection, ESP32 soil-moisture irrigation synced to Firebase. ICT Award semi-finalist. Tags: AI · IoT/Robotics · SW.
 - **Recyclo** — AI waste classification, reuse ideas, thrift exchange, cleanup events, leaderboard. Next.js + Gemini. Tags: AI · SW.
-- **DementiaBot** (Harvard Health Hackathon, Top 20). Tags: AI · SW. *(Limited detail — do not embellish.)*
+- **DementiaBot** (Harvard Health Hackathon, Top 20): its person tracking and voice reminders; the robot itself is under Robotics. Tags: AI · SW.
 - Coursework/experiments (a "lab bench" wall, not individual scenes): brain-tumor area estimation, fire/smoke detection network, anomaly detection autoencoders, DQN, LSTM/GRU/seq2seq, Nepali NLP, Nepali fake news, Nepali song classification, audio classification, optical flow, panoptic segmentation, heritage classification, risk scoring, Bitcoin time series, morphological image processing.
 
 ### Software (systems in production)
@@ -123,7 +124,7 @@ broken deep links on GitHub Pages.
    `tomato-bot-v2.jpg`, `tomato-bot-robot.jpg`), the face-tracking robot, the rescue vehicle and the
    obstacle-avoiding car, plus app screenshots for ArthaVidhi, DocLipi, Jiffy, Phulbari, RedSoil and
    RestHat. Still missing: JeevI hardware, the OnBoard PCB, any video.
-4. WadaConnect and DementiaBot: any screenshots or public links?
+4. WadaConnect: any screenshots or public links? (DementiaBot's photos and proposal arrived 2026-10-28, §3.)
 5. Which projects may show client names (RedSoil blood bank, RestHat restaurants)?
 6. Keep GitHub Pages hosting (needs a SPA 404 fallback) or move to Vercel/Cloudflare Pages?
 

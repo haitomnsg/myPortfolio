@@ -1,0 +1,5 @@
+[
+  ["until", "document.querySelector('[data-readout]').textContent.includes('lid open')", 20000],
+  ["wait", 700],
+  ["shot", "tools/figures/out/cards/dementiabot.png", ".iso-svg", 2]
+]

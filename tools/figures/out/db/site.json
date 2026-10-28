@@ -1,0 +1,14 @@
+[
+  ["wait", 1500],
+  ["eval", "(() => { const el = document.querySelector('.robotics__track'); const N = document.querySelectorAll('.rcard').length; const top = el.getBoundingClientRect().top + scrollY; window.scrollTo(0, top + (2/(N-1))*(el.offsetHeight - innerHeight)); return N; })()"],
+  ["wait", 1800],
+  ["shot", "tools/figures/out/db/site-ring.png", null, 1],
+  ["until", "!!document.querySelector('.robotics__nowItem[data-active] .robotics__openBtn')", 5000],
+  ["click", ".robotics__nowItem[data-active] .robotics__openBtn"],
+  ["wait", 2500],
+  ["shot", "tools/figures/out/db/site-open.png", null, 1],
+  ["until", "(document.querySelector('.robotics__live [data-corner=\"readout\"]')||{}).textContent?.includes('lid open')", 20000],
+  ["wait", 400],
+  ["shot", "tools/figures/out/db/site-open-lid.png", null, 1],
+  ["eval", "document.querySelector('.robotics__live [data-corner=\"readout\"]').textContent"]
+]
