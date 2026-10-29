@@ -213,15 +213,13 @@ export const record = {
 export type Frame = {
   id: string;
   name: string;
-  /** when it was built, YYYY-MM */
+  /** when it was built, YYYY-MM; sets the order, not shown */
   date: string;
   line: string;
   /** the mono readouts under the loupe and in the print; facts only. The chip is the award or the paper */
   readouts: string[];
   stat?: { value: string; label: string };
   chip?: string;
-  /** circled in grease pencil: a keeper */
-  keeper?: boolean;
   /** the drawn output the frame shows when there is no real screen */
   visual?: 'bench' | 'phulbari' | 'tomato-vision' | 'doclipi' | 'recyclo' | 'dementiabot' | 'risk';
   /** a real screen for the frame, and the larger one the print shows */
@@ -244,7 +242,6 @@ export const frames: Frame[] = [
     readouts: ['ResNet-50 / VGG-16', '100 species', 'ESP32 irrigation', 'Firebase'],
     stat: { value: '100', label: 'flower species it can name' },
     chip: 'ICT Award 2025 · Rising Star semi-finalist',
-    keeper: true,
     visual: 'phulbari',
     image: '/ai/phulbari-icon.webp',
     imageAlt: 'The Phulbari mark: a magnifying glass over a pink flower.',
@@ -268,7 +265,6 @@ export const frames: Frame[] = [
     line: 'Sorts bank documents, reads Nepali and English, and answers questions about them in plain language.',
     readouts: ['DenseNet121', 'Gemma 3 Vision', 'Nepali + English OCR', 'questions in plain language'],
     chip: 'JavaFX desktop · FastAPI',
-    keeper: true,
     visual: 'doclipi',
     image: '/ai/doclipi-icon.webp',
     imageAlt: 'The DocLipi mark: a document with the Devanagari letter li.',

@@ -251,18 +251,13 @@ export function Ai() {
                             // eslint-disable-next-line @next/next/no-img-element
                             ? <img src={f.image} alt={f.imageAlt ?? ''} width={1200} height={1000} loading={c === 1 && i < 4 ? 'eager' : 'lazy'} />
                             : f.visual && <FrameVisual kind={f.visual} className="fcard__visual" />}
-                          {f.keeper && (
-                            <svg className="fcard__mark" viewBox="0 0 300 260" aria-hidden="true">
-                              <path d="M46 72C70 26 180 10 246 34c62 22 56 112 28 160-30 52-150 62-214 30C-6 190 4 110 72 60" />
-                            </svg>
-                          )}
                           {/* the Robotics open button's arrow disc, shown on the frame under the pointer */}
                           <span className="fcard__open" aria-hidden="true">
                             <svg viewBox="0 0 12 12" width="12" height="12"><path d="M3 9 9 3M4 3h5v5" /></svg>
                           </span>
                         </span>
-                        {/* the edge print: frame number, name and date, printed on the film itself */}
-                        <span className="fcard__edge"><b>▸ {two(i)}</b><span>{f.name}</span><span>{f.date}</span></span>
+                        {/* the edge print: frame number and name, printed on the film itself */}
+                        <span className="fcard__edge"><b>▸ {two(i)}</b><span>{f.name}</span></span>
                         {mode === 'row' && <span className="fcard__line">{f.line}</span>}
                       </button>
                     </div>
@@ -280,7 +275,7 @@ export function Ai() {
           <div className="ai__cap" aria-live="polite">
             {frames.map((f, i) => (
               <div key={f.id} className="ai__capItem" data-active={i === shown ? '' : undefined} aria-hidden={i !== shown} inert={i !== shown}>
-                <p className="ai__capIndex">{two(i)} / {two(N - 1)} · {f.date}</p>
+                <p className="ai__capIndex">{two(i)} / {two(N - 1)}</p>
                 <p className="ai__capName">{f.name}</p>
                 <p className="ai__capLine">{f.line}</p>
               </div>
@@ -292,7 +287,7 @@ export function Ai() {
       {open !== null && (
         <div className="ai__print" role="dialog" aria-modal="false" aria-labelledby="ai-print-name">
           <div className="ai__printText">
-            <p className="ai__printIndex">{current.date} · {two(open)} / {two(N - 1)}</p>
+            <p className="ai__printIndex">{two(open)} / {two(N - 1)}</p>
             <h3 id="ai-print-name" className="ai__printName">{current.name}</h3>
             <p className="ai__printLine">{current.line}</p>
             {current.stat && <p className="ai__stat"><span>{current.stat.value}</span>{current.stat.label}</p>}
