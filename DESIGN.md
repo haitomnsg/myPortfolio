@@ -582,6 +582,32 @@ chapter 03 in a style of its own, not a third ring or reel. Built straight from 
 - **Retired.** The dark "And the rest of the work." section with its chapter tabs (`Chapters.tsx`, `ChapterTabs.tsx`
   and their CSS) was only holding Software's place.
 
+## 6k. Robotics → AI: the cards come down into the reel (2026-10-29, branch `robotics-ai-handoff`)
+
+Ashish found the step from Robotics to AI disconnected (hero → Robotics was fine) and asked for the robot cards to
+come down and show the AI projects' real icons, in a style that is not the arch's.
+
+- **Idea.** The arch unrolls into the film. Once it has turned to its last robot, the next screen of scroll lifts its
+  five visible cards off the stage as the stage scrolls away. Each one tips forward and turns over (top edge toward
+  you, a half turn about its own x axis), from its robot to an AI icon, straightens, sheds its paper card for the
+  reel's plain frame and drops into the film coming up from below, which then carries it into place. The arch's order
+  becomes the strip's: Rescue → Recyclo, Face tracker → OpenCollab, Obstacle car (top) → Phulbari (middle), JeevI →
+  Jiffy, TomatoBot → DocLipi. The two far cards land in frames still off screen.
+- **How.** `src/components/Bridge.tsx` + `bridge.css`, mounted between the chapters: five stand-ins in a fixed layer
+  over both, drawn with the arch's and the reel's own classes (`.rcard…`, `.fcard__img`), so the swap is invisible.
+  Progress is the reel's top against the screen (0: last robot at rest, 1: reel in place); scroll-driven, so it plays
+  back up too, the cards lifting from the frames nearest the middle onto the arch. Each card leaves 7% of the flight
+  after its inner neighbour. The arch's cards and the target frames hide while the stand-ins fly; the reel stands
+  still (`data-bridge`) and restarts at frame 01 whenever it comes in from above. The Robotics words and heading fade
+  out, so nothing passes under the cards.
+- **The cut.** The paper-to-sky straight cut noted in 6i is gone: a paper fade on the reel's top edge (`.ai::after`)
+  matches the arch's floor and draws up into the sky as the cards land.
+- **Glide.** Robotics ↔ AI glides 1.8 s eased in and out (was 1.1 s ease-out, which crowded the turn into its first
+  frames); `glideTo` takes an easing.
+- **Measured.** At 1024 × 768 and 1440 × 900 the stand-ins match the arch cards and the landed frames to 0 px.
+  Wide screens with motion only: phones and reduced motion keep their swipe rows and never fly. A flight starts only
+  from rest at either end, never halfway (a robot's open view still closing, a reload mid-way).
+
 ## 7. Open questions for Ashish
 
 1. Hero line: "I build robots that see, and software people use." Alternatives: "Robots that

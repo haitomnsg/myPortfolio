@@ -109,9 +109,11 @@ export function Ai() {
       const { w, fw, pitch, L, lo } = geo;
       const h: Hold = hold.current ?? (focusHold.current !== null ? { i: focusHold.current, by: 'focus' } : null);
       const held = h !== null || openRef.current !== null;
-      // the film runs on its own; a scroll pushes it along; a hand on it brings it to a stop
+      // the film runs on its own; a scroll pushes it along; a hand on it brings it to a stop. While the
+      // arch's cards come down into its frames (Bridge.tsx) it stands quite still
       const want = held ? 0 : BASE + Math.min(420, Math.abs(scrollState().velocity) * 7);
-      speed += (want - speed) * (1 - Math.exp(-dt * (want < speed ? 7 : 2.2)));
+      if (section.current?.dataset.bridge !== undefined) speed = 0;
+      else speed += (want - speed) * (1 - Math.exp(-dt * (want < speed ? 7 : 2.2)));
       let off = offset.current + speed * dt;
       if (h?.by === 'focus') off += (lo + h.i * pitch - off) * (1 - Math.exp(-dt * 6)); // a keyboard focus brings its frame to the middle
       off = ((((off - lo) % L) + L) % L) + lo;
@@ -137,7 +139,10 @@ export function Ai() {
       raf = visible ? requestAnimationFrame(tick) : 0;
     };
     const io = new IntersectionObserver((entries) => {
-      visible = entries[entries.length - 1].isIntersecting;
+      const e = entries[entries.length - 1];
+      visible = e.isIntersecting;
+      // coming down from Robotics, the roll starts again at frame 01, under the arch's top card
+      if (visible && e.boundingClientRect.top > 0 && geo.L > 0) offset.current = geo.lo;
       if (visible && !raf) { last = 0; raf = requestAnimationFrame(tick); }
     });
     if (section.current) io.observe(section.current);

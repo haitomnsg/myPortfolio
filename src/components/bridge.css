@@ -1,0 +1,30 @@
+/* ============================================================
+   01 → 02: the arch's cards come down into the reel (Bridge.tsx)
+   ============================================================ */
+.bridge { position: fixed; inset: 0; z-index: 30; overflow: clip; pointer-events: none; visibility: hidden; }
+.bridge[data-on] { visibility: visible; }
+
+/* each card is a point Bridge.tsx moves and leans; its two faces sit centred on it, back to back */
+.bridge__card { position: absolute; left: 0; top: 0; will-change: transform; }
+.bridge__turn { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transform: perspective(1400px) rotateX(var(--turn, 0deg)); }
+.bridge .bridge__front,
+.bridge .bridge__back { position: absolute; left: 0; top: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+/* the faces take their sizes from the arch (--card-w) and the reel (--fw), and grow or shrink to meet */
+.bridge .bridge__front { transform: translate(-50%, -50%) scale(var(--front, 1)); pointer-events: none; cursor: default; }
+.bridge .bridge__back { transform: translate(-50%, -50%) rotateX(180deg) scale(var(--back, 1)); }
+
+/* while they fly, the robot's words and the heading step aside, so the cards pass over nothing */
+.robotics[data-bridge] .robotics__now,
+.robotics[data-bridge] .robotics__head { opacity: 0; pointer-events: none; }
+/* the reel's sky rises out of the arch's paper floor: its top edge stays paper, so no line shows where
+   the chapters meet, and the fade draws up into it as the cards land (Bridge.tsx sets --seam). Over the
+   moving sky, under everything else */
+.ai::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 0;
+  height: calc(var(--seam, 0) * 60%);
+  background: linear-gradient(180deg, var(--c-paper) 0%, rgb(245 248 251 / 0.9) 25%, rgb(245 248 251 / 0) 100%);
+  pointer-events: none;
+}

@@ -61,8 +61,8 @@ export const onWheelGate = (fn: (deltaY: number, y: number) => boolean) => {
   return () => wheelGates.delete(fn);
 };
 /** A locked glide: wheel input waits until it lands. Falls back to scrollToTarget without Lenis. */
-export function glideTo(y: number, duration = 1.1) {
-  if (lenis) lenis.scrollTo(y, { duration, lock: true, easing: (t) => 1 - Math.pow(1 - t, 4) });
+export function glideTo(y: number, duration = 1.1, easing = (t: number) => 1 - Math.pow(1 - t, 4)) {
+  if (lenis) lenis.scrollTo(y, { duration, lock: true, easing });
   else scrollTo({ top: y });
 }
 export const stopScroll = () => lenis?.stop();
