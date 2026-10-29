@@ -3,6 +3,8 @@
 // - Hero → Robotics: past the hero to the robots' stage; up from the first robot back to the hero.
 // - Robotics → AI: once the arch has turned to its last robot, down glides to the AI reel; up from
 //   the reel's top glides back to the last robot. Only while the arch is pinned (ring mode).
+// - AI → Software: the reel is one screen, so down from it glides to the desk, and up from the desk's
+//   first app glides back to the reel. Only while the reel runs and the desk is pinned.
 // Wheel only, so touch stays native; the trailing flick of a trackpad is swallowed until the glide
 // has settled.
 import { glideTo, onPage, onWheelGate } from '@/engine';
@@ -29,16 +31,23 @@ export function startHandoff() {
       const dest = Math.round(stage.getBoundingClientRect().top + y);
       if (dy > 0 && y < dest - 4) return glide(dest);
       if (dy < 0 && y > 4 && y <= dest + 4) return glide(0); // from the first robot straight back
+      if (!reel) return false;
+      const ai = Math.round(reel.getBoundingClientRect().top + y);
       // the arch's last robot rests where its track stops pinning, and has settled 30% of a step before
       // (Robotics.tsx, turnOf)
-      if (!reel || !ring || ring.dataset.mode !== 'ring') return false;
-      const run = stage.offsetHeight - innerHeight;
-      const steps = ring.querySelectorAll('.rcard').length - 1;
-      const last = Math.round(dest + run);
-      const settled = steps > 0 ? Math.round(dest + ((steps - 0.3) / steps) * run) : last;
-      const ai = Math.round(reel.getBoundingClientRect().top + y);
-      if (dy > 0 && y >= settled - 4 && y < ai - 4) return glide(ai);
-      if (dy < 0 && y > last + 4 && y <= ai + 4) return glide(last);
+      if (ring && ring.dataset.mode === 'ring') {
+        const run = stage.offsetHeight - innerHeight;
+        const steps = ring.querySelectorAll('.rcard').length - 1;
+        const last = Math.round(dest + run);
+        const settled = steps > 0 ? Math.round(dest + ((steps - 0.3) / steps) * run) : last;
+        if (dy > 0 && y >= settled - 4 && y < ai - 4) return glide(ai);
+        if (dy < 0 && y > last + 4 && y <= ai + 4) return glide(last);
+      }
+      const desk = document.getElementById('software');
+      if (!desk || reel.dataset.mode !== 'film' || desk.closest<HTMLElement>('.software')?.dataset.mode !== 'desk') return false;
+      const sw = Math.round(desk.getBoundingClientRect().top + y);
+      if (dy > 0 && y >= ai - 4 && y < sw - 4) return glide(sw);
+      if (dy < 0 && y > ai + 4 && y <= sw + 4) return glide(ai);
       return false;
     });
   });

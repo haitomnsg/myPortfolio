@@ -278,7 +278,7 @@ export const frames: Frame[] = [
     readouts: ['Gemini', 'Next.js', 'thrift exchange', 'cleanup events'],
     visual: 'recyclo',
     image: '/ai/recyclo-icon.webp',
-    imageAlt: 'The Recyclo mark: a green bin.',
+    imageAlt: 'The Recyclo mark: three dark leaves turning in a circle on a green tile.',
   },
   {
     // TODO(Ashish): what OpenCollab does, when it was built, and what it runs on
@@ -289,5 +289,99 @@ export const frames: Frame[] = [
     readouts: [],
     image: '/ai/opencollab-icon.webp',
     imageAlt: 'The OpenCollab mark: a terminal prompt in green on black.',
+  },
+];
+
+/** Chapter 03, the desktop: every app on one dock, the ones in daily use first (docs/PROFILE.md §3). */
+export type App = {
+  id: string;
+  name: string;
+  line: string;
+  /** the dock's tile: 512 px, transparent corners (tools/icons/build_icons.py) */
+  icon: string;
+  /** real screens of the app; its window shows them in turn. None: the window keeps its splash */
+  screens: { src: string; alt: string }[];
+  /** what it runs on: under the splash, and in the open view */
+  stack: string[];
+  stat?: { value: string; label: string };
+  chip?: string;
+};
+
+export const software = {
+  title: 'Software',
+  line: ['Systems people use', 'every working day.'] as const,
+};
+
+export const apps: App[] = [
+  {
+    id: 'arthavidhi',
+    name: 'ArthaVidhi',
+    line: 'Billing and business management for small businesses: VAT-compliant invoices, stock, expenses, quotations and attendance.',
+    icon: '/software/arthavidhi-icon.webp',
+    screens: [
+      { src: '/software/arthavidhi-1.webp', alt: 'ArthaVidhi dashboard: total revenue, bills paid and due, and the recent bills.' },
+      { src: '/software/arthavidhi-2.webp', alt: 'ArthaVidhi creating a new bill, with the invoice preview beside the form.' },
+      { src: '/software/arthavidhi-3.webp', alt: 'ArthaVidhi product manager: categories and the products in stock.' },
+      { src: '/software/arthavidhi-4.webp', alt: 'ArthaVidhi quotations: a searchable list with amounts and dates.' },
+    ],
+    stack: ['Next.js', 'TypeScript', 'ShadCN', 'MySQL'],
+    chip: 'PDF reports · VAT-compliant invoices',
+  },
+  {
+    id: 'resthat',
+    name: 'RestHat',
+    line: 'Runs a restaurant from the order to the kitchen to the bill, with IRD-certified billing and receipts on two printers.',
+    icon: '/software/resthat-icon.webp',
+    screens: [
+      { src: '/software/resthat-1.webp', alt: 'RestHat restaurant statistics: today’s orders and sales, and the order list.' },
+      { src: '/software/resthat-2.webp', alt: 'RestHat bill page: the customer form, the items ordered and the food list.' },
+      { src: '/software/resthat-3.webp', alt: 'RestHat menu page: a form for a dish and the menu with photos.' },
+      { src: '/software/resthat-4.webp', alt: 'RestHat IRD page: bills synced to Nepal’s tax authority.' },
+    ],
+    stack: ['PHP', 'MySQL'],
+    chip: 'IRD-certified · deployed to multiple clients',
+  },
+  {
+    id: 'redsoil',
+    name: 'RedSoil',
+    line: 'Blood-bank stock on the desktop, in real use since 2022. Its expiry alerts cut the blood wasted.',
+    icon: '/software/redsoil-icon.webp',
+    screens: [
+      { src: '/software/redsoil-1.webp', alt: 'RedSoil dashboard: pouches in stock for each blood group, and totals for donors, active and expired blood.' },
+      { src: '/software/redsoil-2.webp', alt: 'RedSoil new donor form: personal details and health status.' },
+      { src: '/software/redsoil-3.webp', alt: 'RedSoil find blood: a donor’s pouch with its creation and expiry dates.' },
+      { src: '/software/redsoil-4.webp', alt: 'RedSoil settings: the blood bank’s details, backup and restore.' },
+    ],
+    stack: ['JavaFX', 'MySQL'],
+    stat: { value: '30%', label: 'less blood wasted, from expiry alerts' },
+    chip: 'In use at a blood bank since 2022',
+  },
+  {
+    id: 'wadaconnect',
+    name: 'WadaConnect',
+    line: 'Citizens apply online for their ward’s letters; the ward office reviews, signs and issues them. In Nepali and English.',
+    icon: '/software/wadaconnect-icon.webp',
+    screens: [],
+    stack: ['PHP', 'MySQL', 'mPDF'],
+    stat: { value: '40+', label: 'kinds of application, online' },
+  },
+  {
+    id: 'roboxcraft',
+    name: 'RoboxCraft',
+    line: 'Learning and shopping in one app: courses with certificates, a store with order tracking, reels and chat.',
+    icon: '/software/roboxcraft-icon.webp',
+    screens: [],
+    stack: ['Flutter', 'Riverpod', 'Supabase'],
+    chip: 'With a web console for its inventory',
+  },
+  {
+    id: 'pharmear',
+    name: 'Pharmear',
+    line: 'Bills and stock for a pharmacy, light enough for a low-end PC, with thousands of medicines already in its database.',
+    icon: '/software/pharmear-icon.webp',
+    screens: [],
+    stack: ['Java', 'MySQL', 'JFreeChart'],
+    stat: { value: '4,000+', label: 'medicines in its database' },
+    chip: 'Open source',
   },
 ];

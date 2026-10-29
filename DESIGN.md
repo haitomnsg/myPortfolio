@@ -542,6 +542,46 @@ More projects are coming (5 to 6 at least); the reel takes any count of two or m
 - **Not changed.** Click still prints the frame; the caption still sits bottom left. The edge from Robotics' paper floor
   to the AI sky is a straight cut, passed in the 1.1 s handoff glide.
 
+## 6j. Software: the desktop (2026-10-29)
+
+Ashish sent the icons for every Software app (`inspo/software/`) and a new Recyclo mark (`inspo/ai/`), and asked for
+chapter 03 in a style of its own, not a third ring or reel. Built straight from that brief, without a mockup round.
+
+- **Idea.** Software is shown the way people meet it, as apps. Robotics is an arch you turn, AI a film that runs;
+  Software is a desktop you launch things on. One window stands on the hero's blue field, the six apps sit on a dock of
+  the header's frosted glass under it, and the hero's apricot focus corners lock on the running app's tile. Copy from
+  PROFILE §3; RoboxCraft, Pharmear and WadaConnect facts were added there from their own READMEs.
+- **Order.** ArthaVidhi, RestHat, RedSoil (the three with real screens, two of them in daily use), then WadaConnect,
+  RoboxCraft, Pharmear. `apps` in `src/data/site.ts`; the dock takes any count.
+- **Scroll.** The stage pins for 0.6 screens per app. When the scroll reaches the next app, the window in front shrinks
+  back into its own tile (0.5 s, ease-in) and the next grows out of its tile (0.85 s, the house ease-out) while its
+  icon flies ahead of it from the dock to the middle of the splash; the tile hops once, as a dock does at launch. The
+  splash is the icon, the name, what it runs on, and a load line that runs once. Apps with screens then cross-fade to
+  their four real screens, 3.4 s each (cut from the old site's 2 × 2 sheets); a dash in the title bar marks which.
+  Apps without screens keep the splash. The first app launches once the stage is 85% on screen, so it plays after
+  the glide in from AI.
+- **Dock.** Tiles swell toward the pointer (up to 1.34×, cosine falloff over 2.4 tiles) and rise out of the glass; a
+  frosted name pill shows over the tile under the pointer or keyboard. Click a tile to scroll its app to the front;
+  click the running tile, the window or "Open …" to open it. Arrow keys walk the dock.
+- **Open.** As Robotics and AI: text left (index, name, line, stat, chip, built-with), the window right, grown from
+  its place on the desk (FLIP, 0.8 s). The open window has real tabs for its screens and its own close button. Esc, Back
+  or scrolling 35% of a screen away closes it.
+- **Layout.** The stage is a size container: the window's width is the smaller of 62% of the space between the
+  margins and what the height leaves under the header and over the dock at the screens' 1.84 ratio. Its left edge is
+  on the logo's margin line; the app's words sit in the column to its right with their foot on the window's foot; the
+  dock is centred under the window. Measured at 1440 × 900 (window 72–876, words end 663 = window foot) and 1280 × 720
+  (nothing clipped).
+- **Assets.** `tools/icons/build_icons.py`: tiles at 512 px with transparent corners (a squircle or circle icon is cut
+  from its white backdrop by a corner flood fill; a bare mark goes on a white squircle of the same 22.5% radius), the
+  AI reel's Recyclo frame on the reel's usual 1200 × 1000 card, and the screens. Sources kept in `assets/software/`;
+  the file he named `Phulbari.png` is the RedSoil mark (it matches the old site's `redSoilIcon.png`).
+- **Handoff.** AI → Software glides like Robotics → AI: down from the reel lands on the desk, up from the desk's first
+  app lands on the reel (`src/motion/handoff.ts`), only while the reel runs and the desk pins.
+- **Phones and reduced motion.** No pinning and no launches: each app is a small window (first screen or splash) with
+  its line under it, one column, two from 640 px; tap opens the same view, full screen.
+- **Retired.** The dark "And the rest of the work." section with its chapter tabs (`Chapters.tsx`, `ChapterTabs.tsx`
+  and their CSS) was only holding Software's place.
+
 ## 7. Open questions for Ashish
 
 1. Hero line: "I build robots that see, and software people use." Alternatives: "Robots that
