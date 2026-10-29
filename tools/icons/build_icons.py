@@ -113,6 +113,29 @@ for key, (name, kind) in SOFTWARE.items():
     tile.save(out, quality=90, method=6)
     print("software", key, kind, "->", out)
 
+# ---------------------------------------------------------------- the AI chapter's marks
+
+# Each AI mark bare, on a transparent 512 px square, for its detection box: the white around it is
+# flooded away from the corners (white inside the mark stays), then the mark is fitted into the middle
+# 70% (a wide wordmark into 86% by 40%; a solid app tile into 60%, or it outweighs the line marks), so
+# every box holds about the same weight of ink.
+MARK = 512
+TILES = {"recyclo", "opencollab"}
+for key, name in AI.items():
+    if only and key not in only:
+        continue
+    src = Image.open(os.path.join(root, "assets/ai", name + ".png")).convert("RGB")
+    box = ink_box(src)
+    mark = cutout(src).crop(box)
+    w, h = mark.size
+    bw, bh = (0.86, 0.4) if w / h > 2 else (0.6, 0.6) if key in TILES else (0.7, 0.7)
+    mark = mark.resize(fit(w, h, round(MARK * bw), round(MARK * bh)), Image.LANCZOS)
+    sq = Image.new("RGBA", (MARK, MARK), (255, 255, 255, 0))
+    sq.alpha_composite(mark, ((MARK - mark.width) // 2, (MARK - mark.height) // 2))
+    out = os.path.join(root, "public/ai", key + "-mark.webp")
+    sq.save(out, quality=90, method=6)
+    print("ai mark", key, mark.size, "->", out)
+
 # ---------------------------------------------------------------- the screens
 
 SHEETS = {"arthavidhi": "arthavidhiDashboard", "resthat": "resthatDashboard", "redsoil": "redsoilDashboard"}

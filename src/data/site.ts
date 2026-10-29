@@ -209,20 +209,23 @@ export const record = {
   ],
 };
 
-/** Chapter 02, the contact sheet: every AI frame on one roll of film, in time order (docs/PROFILE.md §2, §3). */
+/** Chapter 02, recognised: every AI project as a model sees it, in time order (docs/PROFILE.md §2, §3). */
 export type Frame = {
   id: string;
   name: string;
   /** when it was built, YYYY-MM; sets the order, not shown */
   date: string;
   line: string;
-  /** the mono readouts under the loupe and in the print; facts only. The chip is the award or the paper */
+  /** what it runs on, in mono: the first under its detection box, all of them in the open view; facts only.
+   *  The chip is the award or the paper */
   readouts: string[];
   stat?: { value: string; label: string };
   chip?: string;
   /** the drawn output the frame shows when there is no real screen */
   visual?: 'bench' | 'phulbari' | 'tomato-vision' | 'doclipi' | 'recyclo' | 'dementiabot' | 'risk';
-  /** a real screen for the frame, and the larger one the print shows */
+  /** the mark bare on a transparent 512 px square, for the detection box (tools/icons/build_icons.py) */
+  mark: string;
+  /** the mark on a white 1200 x 1000 card, and the larger real screen the open view shows */
   image?: string;
   imageAlt?: string;
   print?: string;
@@ -243,6 +246,7 @@ export const frames: Frame[] = [
     stat: { value: '100', label: 'flower species it can name' },
     chip: 'ICT Award 2025 · Rising Star semi-finalist',
     visual: 'phulbari',
+    mark: '/ai/phulbari-mark.webp',
     image: '/ai/phulbari-icon.webp',
     imageAlt: 'The Phulbari mark: a magnifying glass over a pink flower.',
     print: '/ai/phulbari-print.webp',
@@ -254,6 +258,7 @@ export const frames: Frame[] = [
     line: 'A food-delivery app, redesigned: Gemini picks the meal, AR shows the menu, plus games and shorts.',
     readouts: ['Gemini recommendations', 'ARCore menu', 'Android'],
     chip: '2nd place · JIFFY Hackathon 2024',
+    mark: '/ai/jiffy-mark.webp',
     image: '/ai/jiffy-icon.webp',
     imageAlt: 'The Jiffy wordmark in orange.',
     print: '/ai/jiffy-print.webp',
@@ -266,6 +271,7 @@ export const frames: Frame[] = [
     readouts: ['DenseNet121', 'Gemma 3 Vision', 'Nepali + English OCR', 'questions in plain language'],
     chip: 'JavaFX desktop · FastAPI',
     visual: 'doclipi',
+    mark: '/ai/doclipi-mark.webp',
     image: '/ai/doclipi-icon.webp',
     imageAlt: 'The DocLipi mark: a document with the Devanagari letter li.',
     print: '/ai/doclipi-print.webp',
@@ -277,6 +283,7 @@ export const frames: Frame[] = [
     line: 'Tells you what kind of waste you are holding and what you could make of it.',
     readouts: ['Gemini', 'Next.js', 'thrift exchange', 'cleanup events'],
     visual: 'recyclo',
+    mark: '/ai/recyclo-mark.webp',
     image: '/ai/recyclo-icon.webp',
     imageAlt: 'The Recyclo mark: three dark leaves turning in a circle on a green tile.',
   },
@@ -287,6 +294,7 @@ export const frames: Frame[] = [
     date: '2026',
     line: 'Details to come.',
     readouts: [],
+    mark: '/ai/opencollab-mark.webp',
     image: '/ai/opencollab-icon.webp',
     imageAlt: 'The OpenCollab mark: a terminal prompt in green on black.',
   },

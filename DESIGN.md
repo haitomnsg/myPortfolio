@@ -582,31 +582,46 @@ chapter 03 in a style of its own, not a third ring or reel. Built straight from 
 - **Retired.** The dark "And the rest of the work." section with its chapter tabs (`Chapters.tsx`, `ChapterTabs.tsx`
   and their CSS) was only holding Software's place.
 
-## 6k. Robotics → AI: the cards come down into the reel (2026-10-29, branch `robotics-ai-handoff`)
+## 6k. AI recognised, and the cards that come down into it (2026-10-29, branch `robotics-ai-handoff`)
 
 Ashish found the step from Robotics to AI disconnected (hero → Robotics was fine) and asked for the robot cards to
-come down and show the AI projects' real icons, in a style that is not the arch's.
+come down and show the AI projects' real icons, in a style that is not the arch's. A first pass dropped the cards into
+the film reel (6i); he then asked for a new AI layout instead of the reel, with the cards landing in it.
 
-- **Idea.** The arch unrolls into the film. Once it has turned to its last robot, the next screen of scroll lifts its
-  five visible cards off the stage as the stage scrolls away. Each one tips forward and turns over (top edge toward
-  you, a half turn about its own x axis), from its robot to an AI icon, straightens, sheds its paper card for the
-  reel's plain frame and drops into the film coming up from below, which then carries it into place. The arch's order
-  becomes the strip's: Rescue → Recyclo, Face tracker → OpenCollab, Obstacle car (top) → Phulbari (middle), JeevI →
-  Jiffy, TomatoBot → DocLipi. The two far cards land in frames still off screen.
+- **Idea: recognised.** Robotics is an arch you turn, Software a desktop; AI shows its projects the way a model sees
+  them. They stand in one row on the field, in time order, each mark bare (no card) inside a detection box: a hairline
+  box with stronger sky-deep corners, the class name on a tag over its top-left corner (`phulbari`, `doclipi`, …),
+  and what reads it under the box in mono (the first readout; OpenCollab has none yet). The hero's focus box, its
+  corners inside the box where the robot cards wear theirs, hunts from one project to the next on its own, 3.4 s each:
+  it glides over, opens a little, overshoots, settles and turns apricot, and the box's tag turns apricot with it. The
+  caption at the foot (index, name, line and Robotics' frosted Open button) follows it. Pointer or keyboard focus takes
+  it to that box and holds it; click opens the same view as before. No dimming: every mark at full strength.
+- **Layout.** The row spans the margins exactly (first box on the logo's line, last on the heading's), boxes square,
+  as tall as the space between heading and caption allows (`.ai__scene` is a size container). Marks come from
+  `assets/ai/` through `tools/icons/build_icons.py`: cut out of their white, fitted into 70% of a transparent 512 px
+  square, a wide wordmark 86% × 40%, the two solid app tiles 60% so they do not outweigh the line marks
+  (`public/ai/<id>-mark.webp`, `mark` in `frames`). Measured at 1440 × 900 and 1280 × 720.
+- **The drop.** Once the arch has turned to its last robot, the next screen of scroll lifts its five visible cards off
+  the stage as the stage scrolls away. Each tips forward and turns over (top edge toward you), from its robot to its
+  project's mark on a plate of the arch's paper, straightens and drops into its box in the row, which is still coming
+  up and carries it into place; there the plate melts away and the box's corners come up round the bare mark, and the
+  tags then print left to right. The arch's order is the row's: Rescue → Phulbari, Face tracker → Jiffy, Obstacle car
+  (top) → DocLipi (middle), JeevI → Recyclo, TomatoBot → OpenCollab. The top card keeps its apricot focus corners the
+  whole way down, so the focus passes from Robotics straight into AI: the focus box starts, locked, on the middle box.
 - **How.** `src/components/Bridge.tsx` + `bridge.css`, mounted between the chapters: five stand-ins in a fixed layer
-  over both, drawn with the arch's and the reel's own classes (`.rcard…`, `.fcard__img`), so the swap is invisible.
-  Progress is the reel's top against the screen (0: last robot at rest, 1: reel in place); scroll-driven, so it plays
-  back up too, the cards lifting from the frames nearest the middle onto the arch. Each card leaves 7% of the flight
-  after its inner neighbour. The arch's cards and the target frames hide while the stand-ins fly; the reel stands
-  still (`data-bridge`) and restarts at frame 01 whenever it comes in from above. The Robotics words and heading fade
-  out, so nothing passes under the cards.
-- **The cut.** The paper-to-sky straight cut noted in 6i is gone: a paper fade on the reel's top edge (`.ai::after`)
-  matches the arch's floor and draws up into the sky as the cards land.
+  over both, drawn with the arch's and the row's own classes, so the swaps at both ends are invisible. Progress is AI's
+  top against the screen (0: last robot at rest, 1: AI in place); scroll-driven, so it plays back up too. Each card
+  leaves 7% of the flight after its inner neighbour. While they fly (`data-bridge`) the arch's cards and the boxes
+  hide, the Robotics words and heading fade out, and AI's tags, readouts, caption and focus box wait. A paper fade on
+  AI's top edge (`.ai::after`) matches the arch's floor and draws up into the sky as the cards land, so the straight
+  cut noted in 6i is gone. With more than five projects the extra boxes are simply there; with fewer, the outer cards
+  fall away under the screen.
 - **Glide.** Robotics ↔ AI glides 1.8 s eased in and out (was 1.1 s ease-out, which crowded the turn into its first
-  frames); `glideTo` takes an easing.
-- **Measured.** At 1024 × 768 and 1440 × 900 the stand-ins match the arch cards and the landed frames to 0 px.
-  Wide screens with motion only: phones and reduced motion keep their swipe rows and never fly. A flight starts only
-  from rest at either end, never halfway (a robot's open view still closing, a reload mid-way).
+  frames); `glideTo` takes an easing. Measured: the cards are mostly in the air from 0.6 s to 1.2 s and land at 1.75 s.
+- **Phones and reduced motion.** Phones get a two-column grid, each box with its name and line under it, no focus box;
+  tap opens. Reduced motion keeps the row; the focus box only moves when asked, without gliding. Neither flies: a
+  flight needs the arch (wide, motion) and starts only from rest at either end, never halfway.
+- **Retired.** The film reel (6i): holes, strip and running film. Its sky, heading and open view stay.
 
 ## 7. Open questions for Ashish
 

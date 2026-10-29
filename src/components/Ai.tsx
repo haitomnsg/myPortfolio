@@ -1,184 +1,146 @@
 'use client';
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as RPointerEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { gsap } from 'gsap';
 import { ai, frames } from '@/data/site';
-import { ease, scrollState } from '@/engine';
+import { ease, onScroll } from '@/engine';
 import { FrameVisual } from './figures/AiVisuals';
 import { Sky } from './Sky';
 import './ai.css';
 
-// Chapter 02, the reel (docs/SHOWCASE_CONCEPTS.md §4): every AI project is a frame on one roll of
-// film, in time order, under a slow moving sky. The whole strip runs, holes, frames and edge print
-// together, on its own once the section is on screen; scrolling nudges it along. Every frame shows
-// as it is; only the edge print of the frame at the middle brightens, and the caption names it.
-// Hover holds the film on the frame under the pointer; click prints it. The frames are sized from
-// the band's height, so the section fills one screen exactly.
+// Chapter 02, recognised: the AI projects stand in one row on the field the way a model sees them, each
+// mark bare inside a detection box, its class name on the box's tag and what reads it underneath. The
+// hero's apricot focus box hunts from one to the next on its own, a few seconds on each, and the words
+// at the foot follow it; the pointer or the keyboard takes it to the one they are on, and a click opens
+// it. The arch's cards come down into the boxes from Robotics (Bridge.tsx), the top one into the middle
+// box still in focus, so the focus box starts there.
 
 const N = frames.length;
-const COPIES = 4; // the roll repeats, so it never runs out
-const BASE = 34; // px per second the film runs on its own
-const smooth = (a: number, b: number, x: number) => {
-  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
-  return t * t * (3 - 2 * t);
-};
+export const AI_MID = Math.floor((N - 1) / 2); // the box the arch's top card drops into
+const HOLD = 3400; // ms the focus rests on each project
+const LOCK = 620; // ms the focus box takes to reach a box; it locks (turns apricot) as it lands
 const two = (n: number) => String(n + 1).padStart(2, '0');
-const FILM_Y = 2 * 30 + 30; // the strip's height past the image: two hole rows and the edge print (ai.css)
 
-type Mode = 'film' | 'row';
-type Hold = { k: number; by: 'pointer' } | { i: number; by: 'focus' } | null;
+type Mode = 'scene' | 'grid';
 
 export function Ai() {
   const section = useRef<HTMLElement>(null);
-  const band = useRef<HTMLDivElement>(null);
-  const clip = useRef<HTMLDivElement>(null);
-  const track = useRef<HTMLDivElement>(null);
-  const cards = useRef<(HTMLButtonElement | null)[]>([]);
+  const scene = useRef<HTMLDivElement>(null);
+  const af = useRef<HTMLSpanElement>(null);
+  const boxes = useRef<(HTMLButtonElement | null)[]>([]);
   const print = useRef<HTMLDivElement>(null);
-  const [mode, setMode] = useState<Mode>('film');
-  const [shown, setShown] = useState(0); // the lit frame
+  const [mode, setMode] = useState<Mode>('scene');
+  const [still, setStill] = useState(false); // reduced motion: the focus only moves when asked
+  const [active, setActive] = useState(AI_MID);
+  const [held, setHeld] = useState<number | null>(null); // under the pointer or the keyboard
+  const [seen, setSeen] = useState(false); // on screen
+  const [bridging, setBridging] = useState(false); // the arch's cards are on their way (Bridge.tsx)
   const [open, setOpen] = useState<number | null>(null);
-  const hold = useRef<Hold>(null);
-  const focusHold = useRef<number | null>(null);
-  const openRef = useRef<number | null>(null);
+  const hunt = useRef<Animation | null>(null);
+  const huntedFor = useRef(-1); // the box the focus box last went to
   const openedFrom = useRef<HTMLButtonElement | null>(null);
   const openedAt = useRef(0);
   const closing = useRef(false);
-  const offset = useRef(-1); // where the film stands, px; -1 until measured
-  openRef.current = open;
 
-  // phones and reduced motion get a strip you swipe, and the film does not run
+  // phones get a grid you scroll past; reduced motion keeps the row, still
   useEffect(() => {
     const narrow = matchMedia('(max-width: 899px)');
-    const still = matchMedia('(prefers-reduced-motion: reduce)');
-    const pick = () => setMode(narrow.matches || still.matches ? 'row' : 'film');
+    const calm = matchMedia('(prefers-reduced-motion: reduce)');
+    const pick = () => { setMode(narrow.matches ? 'grid' : 'scene'); setStill(calm.matches); };
     pick();
     narrow.addEventListener('change', pick);
-    still.addEventListener('change', pick);
-    return () => { narrow.removeEventListener('change', pick); still.removeEventListener('change', pick); };
+    calm.addEventListener('change', pick);
+    return () => { narrow.removeEventListener('change', pick); calm.removeEventListener('change', pick); };
   }, []);
 
-  // ------------------------------------------------------------ the film
+  // on screen, and whether the arch's cards are coming down into the row
   useEffect(() => {
-    if (mode !== 'film') {
-      cards.current.forEach((el) => el?.style.setProperty('--focus', '1'));
-      // the swiped strip's frames, on whole pixels too
-      const size = () => {
-        const fw = Math.floor((Math.min(innerWidth * 0.72, 340) + 14) / 6) * 6 - 14;
-        section.current?.style.setProperty('--gap', '14px');
-        section.current?.style.setProperty('--fw', `${fw}px`);
-      };
-      size();
-      addEventListener('resize', size);
-      return () => removeEventListener('resize', size);
-    }
-    let raf = 0;
-    let visible = false;
-    let last = 0;
-    let speed = 0;
-    let lx = 0; // where the light falls, in the clip's coordinates
-    let shownNow = -1;
-    // the film's position wraps over one roll, placed so that the focusable copy (the second) is the
-    // one that passes the middle: frame i of it sits there at offset lo + i * pitch
-    const geo = { w: 0, fw: 0, pitch: 0, L: 0, lo: 0 };
-    const measure = () => {
-      const c = clip.current;
-      const a = cards.current[0];
-      const b = cards.current[1];
-      const bd = band.current;
-      if (!c || !a || !b || !bd || !section.current) return;
-      // the image takes the band's height less the strip's own rows, at most 42% of the width. The
-      // frames butt edge to edge, so the gap and the six holes' pitch land on whole pixels, or each
-      // join would show a hairline
-      const pad = parseFloat(getComputedStyle(bd).paddingTop) * 2;
-      const gap = 2 * Math.round(Math.min(22, Math.max(14, innerWidth * 0.013)) / 2);
-      const raw = Math.max(180, Math.min((bd.clientHeight - pad - FILM_Y) * 1.2, bd.clientWidth * 0.42));
-      const fw = Math.floor((raw + gap) / 6) * 6 - gap;
-      section.current.style.setProperty('--gap', `${gap}px`);
-      section.current.style.setProperty('--fw', `${fw}px`);
-      geo.w = c.clientWidth;
-      geo.fw = a.offsetWidth;
-      geo.pitch = b.offsetLeft - a.offsetLeft;
-      geo.L = N * geo.pitch;
-      geo.lo = N * geo.pitch + geo.fw / 2 - geo.w / 2;
-      if (offset.current < 0) offset.current = geo.lo; // frame 01 in the middle on arrival
-      if (lx === 0) lx = geo.w / 2;
-    };
-    const tick = (t: number) => {
-      const dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
-      last = t;
-      const { w, fw, pitch, L, lo } = geo;
-      const h: Hold = hold.current ?? (focusHold.current !== null ? { i: focusHold.current, by: 'focus' } : null);
-      const held = h !== null || openRef.current !== null;
-      // the film runs on its own; a scroll pushes it along; a hand on it brings it to a stop. While the
-      // arch's cards come down into its frames (Bridge.tsx) it stands quite still
-      const want = held ? 0 : BASE + Math.min(420, Math.abs(scrollState().velocity) * 7);
-      if (section.current?.dataset.bridge !== undefined) speed = 0;
-      else speed += (want - speed) * (1 - Math.exp(-dt * (want < speed ? 7 : 2.2)));
-      let off = offset.current + speed * dt;
-      if (h?.by === 'focus') off += (lo + h.i * pitch - off) * (1 - Math.exp(-dt * 6)); // a keyboard focus brings its frame to the middle
-      off = ((((off - lo) % L) + L) % L) + lo;
-      offset.current = off;
-      if (track.current) track.current.style.transform = `translate3d(${(-off).toFixed(2)}px,0,0)`;
-      // the light glides to the held frame, or back to the middle
-      const lwant = h?.by === 'pointer' ? h.k * pitch + fw / 2 - off : h?.by === 'focus' ? (N + h.i) * pitch + fw / 2 - off : w / 2;
-      lx += (lwant - lx) * (1 - Math.exp(-dt * 9));
-      // the edge print brightens under the light; the frames themselves never change
-      let near = -1;
-      let nd = Infinity;
-      cards.current.forEach((el, k) => {
-        if (!el) return;
-        const cx = k * pitch + fw / 2 - off;
-        if (cx < -fw || cx > w + fw) { el.style.setProperty('--focus', '0'); return; }
-        const d = Math.abs(cx - lx) / pitch;
-        const f = smooth(0.9, 0.18, d);
-        el.style.setProperty('--focus', f.toFixed(3));
-        if (d < nd) { nd = d; near = k; }
-      });
-      if (near >= 0 && near % N !== shownNow) { shownNow = near % N; setShown(shownNow); }
-      if (openRef.current !== null && !closing.current && Math.abs(scrollY - openedAt.current) > innerHeight * 0.35) close();
-      raf = visible ? requestAnimationFrame(tick) : 0;
-    };
-    const io = new IntersectionObserver((entries) => {
-      const e = entries[entries.length - 1];
-      visible = e.isIntersecting;
-      // coming down from Robotics, the roll starts again at frame 01, under the arch's top card
-      if (visible && e.boundingClientRect.top > 0 && geo.L > 0) offset.current = geo.lo;
-      if (visible && !raf) { last = 0; raf = requestAnimationFrame(tick); }
+    const el = section.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => setSeen(entries[entries.length - 1].isIntersecting));
+    io.observe(el);
+    // while they fly, the focus waits on the middle box, where the arch's focused card lands
+    const mo = new MutationObserver(() => {
+      const on = el.dataset.bridge !== undefined;
+      setBridging(on);
+      if (on) { setActive(AI_MID); setHeld(null); }
     });
-    if (section.current) io.observe(section.current);
-    measure();
-    const ro = new ResizeObserver(measure); // the band's size, not only the window's
-    if (band.current) ro.observe(band.current);
-    return () => { io.disconnect(); ro.disconnect(); cancelAnimationFrame(raf); };
-    // `close` only reads refs; it is stable enough for the loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+    mo.observe(el, { attributes: true, attributeFilter: ['data-bridge'] });
+    return () => { io.disconnect(); mo.disconnect(); };
+  }, []);
 
-  // the pointer on the film: the light goes to the frame under it and the film waits
-  const onMove = (e: RPointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== 'mouse' || mode !== 'film' || !clip.current || !cards.current[1] || !cards.current[0]) return;
-    const pitch = cards.current[1].offsetLeft - cards.current[0].offsetLeft;
-    const fw = cards.current[0].offsetWidth;
-    const x = e.clientX - clip.current.getBoundingClientRect().left + offset.current;
-    const k = Math.min(COPIES * N - 1, Math.max(0, Math.round((x - fw / 2) / pitch)));
-    hold.current = { k, by: 'pointer' };
-  };
-  const onLeave = () => { hold.current = null; };
+  // ------------------------------------------------------------ the focus box
+  // it hunts on its own, one box after the next, unless a hand or the keyboard holds it
+  useEffect(() => {
+    if (mode !== 'scene' || still || !seen || bridging || open !== null || held !== null) return;
+    const t = setTimeout(() => setActive((a) => (a + 1) % N), HOLD);
+    return () => clearTimeout(t);
+  }, [active, mode, still, seen, bridging, open, held]);
 
-  // ------------------------------------------------------------ printing a frame
-  const choose = (k: number) => {
+  const place = useCallback(() => {
+    const el = af.current;
+    const box = boxes.current[active];
+    const sc = scene.current;
+    if (!el || !box || !sc) return;
+    const s = sc.getBoundingClientRect();
+    const b = box.getBoundingClientRect();
+    el.style.transform = `translate3d(${(b.left - s.left).toFixed(1)}px, ${(b.top - s.top).toFixed(1)}px, 0)`;
+    el.style.width = `${b.width.toFixed(1)}px`;
+    el.style.height = `${b.height.toFixed(1)}px`;
+  }, [active]);
+
+  // to a new box: it glides over, opening a little as it goes, overshoots, settles, and locks. Only a
+  // move hunts: while the arch's cards fly it jumps to the middle box unseen, and is locked on landing
+  useLayoutEffect(() => {
+    const el = af.current;
+    if (!el) return;
+    if (bridging) el.style.transition = 'none';
+    place();
+    if (bridging) { void el.offsetWidth; el.style.transition = ''; }
+    const moved = huntedFor.current !== active;
+    huntedFor.current = active;
+    if (bridging || still || !moved) { hunt.current?.cancel(); el.dataset.lock = ''; return; }
+    delete el.dataset.lock;
+    hunt.current?.cancel();
+    hunt.current = el.animate(
+      [{ scale: 1 }, { scale: 1.12, offset: 0.4 }, { scale: 0.96, offset: 0.78 }, { scale: 1 }],
+      { duration: LOCK + 420, easing: 'cubic-bezier(0.2, 0.7, 0.1, 1)' },
+    );
+    const t = setTimeout(() => { el.dataset.lock = ''; }, LOCK);
+    return () => clearTimeout(t);
+  }, [active, mode, place, bridging, still]);
+
+  // the row resizes with the screen; the box follows without gliding
+  useEffect(() => {
+    const sc = scene.current;
+    if (!sc || mode !== 'scene') return;
+    const ro = new ResizeObserver(() => {
+      const el = af.current;
+      if (!el) return;
+      el.style.transition = 'none';
+      place();
+      requestAnimationFrame(() => { el.style.transition = ''; });
+    });
+    ro.observe(sc);
+    return () => ro.disconnect();
+  }, [mode, place]);
+
+  const point = (i: number) => { if (open === null) { setHeld(i); setActive(i); } };
+  const letGo = (i: number) => setHeld((h) => (h === i ? null : h));
+
+  // ------------------------------------------------------------ opening a project
+  const choose = (i: number) => {
     if (open !== null) return;
-    openedFrom.current = cards.current[k];
-    setOpen(k % N);
+    openedFrom.current = boxes.current[i];
+    setActive(i);
+    setOpen(i);
   };
 
   useLayoutEffect(() => {
     if (open === null || !print.current) return;
     openedAt.current = scrollY;
-    const paper = openedFrom.current?.querySelector('.fcard__img');
+    const from = openedFrom.current?.getBoundingClientRect();
     const to = print.current.getBoundingClientRect();
-    const from = paper?.getBoundingClientRect();
-    const tw = from && mode === 'film'
+    const tw = from && mode === 'scene'
       ? gsap.fromTo(print.current,
         { x: from.left - to.left, y: from.top - to.top, scaleX: from.width / to.width, scaleY: from.height / to.height, transformOrigin: '0 0' },
         { x: 0, y: 0, scaleX: 1, scaleY: 1, duration: 0.85, ease: ease.out })
@@ -188,31 +150,37 @@ export function Ai() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  function close() {
+  const close = useCallback(() => {
     if (open === null || closing.current) return;
     const el = print.current;
-    const card = openedFrom.current;
-    const paper = card?.querySelector('.fcard__img');
+    const box = openedFrom.current;
     closing.current = true;
-    const done = () => { closing.current = false; setOpen(null); card?.focus({ preventScroll: true }); };
-    if (!el || !paper || mode === 'row') { done(); return; }
+    const done = () => { closing.current = false; setOpen(null); box?.focus({ preventScroll: true }); };
+    if (!el || !box || mode !== 'scene') { done(); return; }
     const to = el.getBoundingClientRect();
-    const from = paper.getBoundingClientRect();
+    const from = box.getBoundingClientRect();
     gsap.to(el, { x: from.left - to.left, y: from.top - to.top, scaleX: from.width / to.width, scaleY: from.height / to.height, transformOrigin: '0 0', duration: 0.6, ease: ease.inOut, onComplete: done });
-  }
+  }, [open, mode]);
+
+  // scrolling a third of a screen away puts it back
+  useEffect(() => {
+    if (open === null) return;
+    const check = () => { if (Math.abs(scrollY - openedAt.current) > innerHeight * 0.35) close(); };
+    const off = onScroll(check);
+    addEventListener('scroll', check, { passive: true });
+    return () => { off(); removeEventListener('scroll', check); };
+  }, [open, close]);
 
   const onKey = (e: KeyboardEvent<HTMLElement>) => {
     if (e.key === 'Escape' && open !== null) { e.preventDefault(); close(); return; }
-    if (open !== null || mode !== 'film' || focusHold.current === null) return;
+    if (open !== null || mode !== 'scene' || held === null) return;
     const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
     if (!step) return;
     e.preventDefault();
-    const i = (focusHold.current + step + N) % N;
-    cards.current[N + i]?.focus({ preventScroll: true });
+    boxes.current[(held + step + N) % N]?.focus();
   };
 
-  const copies = mode === 'film' ? COPIES : 1;
-  const current = frames[open ?? shown];
+  const current = frames[open ?? active];
   return (
     <section
       ref={section}
@@ -230,59 +198,52 @@ export function Ai() {
         <p className="ai__line">{ai.line[0]} <em>{ai.line[1]}</em></p>
       </header>
 
-      <div className="ai__band" ref={band}>
-        <div className="ai__film" ref={clip} onPointerMove={onMove} onPointerLeave={onLeave}>
-          <div className="ai__track" ref={track} role="list" aria-label="AI projects, in order">
-            {Array.from({ length: copies }, (_, c) => (
-              // the copies are the same roll again: the second speaks to assistive tech, the rest only to the pointer
-              <div key={c} className="ai__copy" role={c === 1 || copies === 1 ? undefined : 'presentation'} aria-hidden={copies > 1 && c !== 1 ? true : undefined}>
-                {frames.map((f, i) => {
-                  const k = c * N + i;
-                  return (
-                    <div role={c === 1 || copies === 1 ? 'listitem' : undefined} key={f.id} className="ai__item">
-                      <button
-                        type="button"
-                        ref={(el) => { cards.current[k] = el; }}
-                        className="fcard"
-                        onClick={() => choose(k)}
-                        onFocus={() => { if (mode === 'film') focusHold.current = i; }}
-                        onBlur={() => { if (focusHold.current === i) focusHold.current = null; }}
-                        aria-label={`Open ${f.name}`}
-                        tabIndex={copies > 1 && c !== 1 ? -1 : 0}
-                        style={{ '--focus': 0 } as CSSProperties}
-                      >
-                        <span className="fcard__img">
-                          {f.image
-                            // eslint-disable-next-line @next/next/no-img-element
-                            ? <img src={f.image} alt={f.imageAlt ?? ''} width={1200} height={1000} loading={c === 1 && i < 4 ? 'eager' : 'lazy'} />
-                            : f.visual && <FrameVisual kind={f.visual} className="fcard__visual" />}
-                          {/* the Robotics open button's arrow disc, shown on the frame under the pointer */}
-                          <span className="fcard__open" aria-hidden="true">
-                            <svg viewBox="0 0 12 12" width="12" height="12"><path d="M3 9 9 3M4 3h5v5" /></svg>
-                          </span>
-                        </span>
-                        {/* the edge print: frame number and name, printed on the film itself */}
-                        <span className="fcard__edge"><b>▸ {two(i)}</b><span>{f.name}</span></span>
-                        {mode === 'row' && <span className="fcard__line">{f.line}</span>}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="ai__scene" ref={scene}>
+        <ol className="ai__row" style={{ '--n': N } as CSSProperties} aria-label="AI projects, in order">
+          {frames.map((f, i) => (
+            <li key={f.id} className="detect" data-active={mode === 'scene' && i === active ? '' : undefined} style={{ '--i': i } as CSSProperties}>
+              <button
+                type="button"
+                ref={(el) => { boxes.current[i] = el; }}
+                className="detect__box"
+                onClick={() => choose(i)}
+                onPointerEnter={(e) => { if (e.pointerType === 'mouse') point(i); }}
+                onPointerLeave={() => letGo(i)}
+                onFocus={() => point(i)}
+                onBlur={() => letGo(i)}
+                aria-label={`Open ${f.name}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="detect__mark" src={f.mark} alt="" width={512} height={512} />
+                <span className="detect__corners" aria-hidden="true"><i /><i /><i /><i /></span>
+                <span className="detect__tag" aria-hidden="true">{f.name.toLowerCase()}</span>
+              </button>
+              {f.readouts[0] && <p className="detect__meta">{f.readouts[0]}</p>}
+              {mode === 'grid' && <p className="detect__name">{f.name}</p>}
+              {mode === 'grid' && <p className="detect__line">{f.line}</p>}
+            </li>
+          ))}
+        </ol>
+        {/* the hero's focus box, on the project in focus */}
+        {mode === 'scene' && <span className="ai__af" ref={af} aria-hidden="true"><i /><i /><i /><i /></span>}
       </div>
 
-      {/* the frame at the middle, from the left margin */}
-      {mode === 'film' && (
+      {/* the project in focus, from the left margin */}
+      {mode === 'scene' && (
         <div className="ai__foot">
           <div className="ai__cap" aria-live="polite">
             {frames.map((f, i) => (
-              <div key={f.id} className="ai__capItem" data-active={i === shown ? '' : undefined} aria-hidden={i !== shown} inert={i !== shown}>
+              <div key={f.id} className="ai__capItem" data-active={i === active ? '' : undefined} aria-hidden={i !== active} inert={i !== active}>
                 <p className="ai__capIndex">{two(i)} / {two(N - 1)}</p>
                 <p className="ai__capName">{f.name}</p>
                 <p className="ai__capLine">{f.line}</p>
+                {/* Robotics' open button, so both chapters open a project the same way */}
+                <button type="button" className="robotics__openBtn" onClick={() => choose(i)}>
+                  Open {f.name}
+                  <span className="robotics__openArrow" aria-hidden="true">
+                    <svg viewBox="0 0 12 12" width="12" height="12"><path d="M3 9 9 3M4 3h5v5" /></svg>
+                  </span>
+                </button>
               </div>
             ))}
           </div>
@@ -300,7 +261,7 @@ export function Ai() {
             {current.readouts.length > 0 && <ul className="ai__specs" aria-label="Built with">
               {current.readouts.map((s) => <li key={s}>{s}</li>)}
             </ul>}
-            <button type="button" className="ai__back" onClick={close}><span aria-hidden="true">← </span>Back to the film</button>
+            <button type="button" className="ai__back" onClick={close}><span aria-hidden="true">← </span>Back to the projects</button>
           </div>
           <div className="ai__printFrame" ref={print} tabIndex={-1}>
             <button type="button" className="ai__close" onClick={close} aria-label="Close">×</button>
