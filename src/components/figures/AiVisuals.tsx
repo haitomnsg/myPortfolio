@@ -4,7 +4,7 @@ import type { Frame } from '@/data/site';
 // site's drawing language: navy hairlines, paper, one apricot reading. Where a real screen exists
 // (Phulbari, DocLipi) the frame shows that instead.
 
-type Props = { kind: Frame['visual']; className?: string };
+type Props = { kind: NonNullable<Frame['visual']>; className?: string };
 
 const ink = '#121a26';
 const sky = '#1e578f';

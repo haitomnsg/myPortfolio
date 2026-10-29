@@ -223,7 +223,7 @@ export type Frame = {
   /** circled in grease pencil: a keeper */
   keeper?: boolean;
   /** the drawn output the frame shows when there is no real screen */
-  visual: 'bench' | 'phulbari' | 'tomato-vision' | 'doclipi' | 'recyclo' | 'dementiabot' | 'risk';
+  visual?: 'bench' | 'phulbari' | 'tomato-vision' | 'doclipi' | 'recyclo' | 'dementiabot' | 'risk';
   /** a real screen for the frame, and the larger one the print shows */
   image?: string;
   imageAlt?: string;
@@ -237,14 +237,6 @@ export const ai = {
 
 export const frames: Frame[] = [
   {
-    id: 'bench',
-    name: 'The bench',
-    date: '2023-11',
-    line: 'Coursework and experiments since the first semester at Kathmandu University.',
-    readouts: ['brain-tumour area', 'fire & smoke detection', 'autoencoders', 'DQN', 'Nepali NLP', 'optical flow'],
-    visual: 'bench',
-  },
-  {
     id: 'phulbari',
     name: 'Phulbari',
     date: '2024-05',
@@ -254,20 +246,20 @@ export const frames: Frame[] = [
     chip: 'ICT Award 2025 · Rising Star semi-finalist',
     keeper: true,
     visual: 'phulbari',
-    image: '/ai/phulbari-frame.webp',
-    imageAlt: 'A red rose with rain on it, photographed through the Phulbari app.',
+    image: '/ai/phulbari-icon.webp',
+    imageAlt: 'The Phulbari mark: a magnifying glass over a pink flower.',
     print: '/ai/phulbari-print.webp',
   },
   {
-    id: 'tomato-vision',
-    name: 'TomatoBot, the eyes',
-    date: '2024-12',
-    line: 'The vision half of TomatoBot: YOLOv11 tells ripe from unripe, 88% of the time in the field.',
-    readouts: ['YOLOv11', '6 classes', '88% in the field', 'Raspberry Pi'],
-    stat: { value: '88%', label: 'ripeness detection, in the field' },
-    chip: 'Published · IJICTDC 2026',
-    keeper: true,
-    visual: 'tomato-vision',
+    id: 'jiffy',
+    name: 'Jiffy',
+    date: '2024',
+    line: 'A food-delivery app, redesigned: Gemini picks the meal, AR shows the menu, plus games and shorts.',
+    readouts: ['Gemini recommendations', 'ARCore menu', 'Android'],
+    chip: '2nd place · JIFFY Hackathon 2024',
+    image: '/ai/jiffy-icon.webp',
+    imageAlt: 'The Jiffy wordmark in orange.',
+    print: '/ai/jiffy-print.webp',
   },
   {
     id: 'doclipi',
@@ -278,8 +270,8 @@ export const frames: Frame[] = [
     chip: 'JavaFX desktop · FastAPI',
     keeper: true,
     visual: 'doclipi',
-    image: '/ai/doclipi-frame.webp',
-    imageAlt: 'The DocLipi document classifier screen: an upload panel and the categories it sorts into.',
+    image: '/ai/doclipi-icon.webp',
+    imageAlt: 'The DocLipi mark: a document with the Devanagari letter li.',
     print: '/ai/doclipi-print.webp',
   },
   {
@@ -289,23 +281,17 @@ export const frames: Frame[] = [
     line: 'Tells you what kind of waste you are holding and what you could make of it.',
     readouts: ['Gemini', 'Next.js', 'thrift exchange', 'cleanup events'],
     visual: 'recyclo',
+    image: '/ai/recyclo-icon.webp',
+    imageAlt: 'The Recyclo mark: a green bin.',
   },
   {
-    id: 'dementiabot',
-    name: 'DementiaBot',
-    date: '2026-04',
-    line: 'Built with team DizzyBits for the Harvard Health Hackathon. Top 20.',
-    readouts: ['team DizzyBits', '2nd in the regional round'],
-    chip: 'Harvard Health Hackathon · Top 20',
-    visual: 'dementiabot',
-  },
-  {
-    id: 'risk',
-    name: 'Risk scoring',
-    date: '2026-07',
-    line: 'Scores accounts for risk from their transactions, and says why, in a ranked review queue.',
-    readouts: ['XGBoost', 'explainable scores', 'ranked review queue'],
-    chip: '2nd place · AI/ML Intelligence Hackathon 2026',
-    visual: 'risk',
+    // TODO(Ashish): what OpenCollab does, when it was built, and what it runs on
+    id: 'opencollab',
+    name: 'OpenCollab',
+    date: '2026',
+    line: 'Details to come.',
+    readouts: [],
+    image: '/ai/opencollab-icon.webp',
+    imageAlt: 'The OpenCollab mark: a terminal prompt in green on black.',
   },
 ];

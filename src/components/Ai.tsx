@@ -250,7 +250,7 @@ export function Ai() {
                           {f.image
                             // eslint-disable-next-line @next/next/no-img-element
                             ? <img src={f.image} alt={f.imageAlt ?? ''} width={1200} height={1000} loading={c === 1 && i < 4 ? 'eager' : 'lazy'} />
-                            : <FrameVisual kind={f.visual} className="fcard__visual" />}
+                            : f.visual && <FrameVisual kind={f.visual} className="fcard__visual" />}
                           {f.keeper && (
                             <svg className="fcard__mark" viewBox="0 0 300 260" aria-hidden="true">
                               <path d="M46 72C70 26 180 10 246 34c62 22 56 112 28 160-30 52-150 62-214 30C-6 190 4 110 72 60" />
@@ -297,9 +297,9 @@ export function Ai() {
             <p className="ai__printLine">{current.line}</p>
             {current.stat && <p className="ai__stat"><span>{current.stat.value}</span>{current.stat.label}</p>}
             {current.chip && <p className="ai__chip">{current.chip}</p>}
-            <ul className="ai__specs" aria-label="Built with">
+            {current.readouts.length > 0 && <ul className="ai__specs" aria-label="Built with">
               {current.readouts.map((s) => <li key={s}>{s}</li>)}
-            </ul>
+            </ul>}
             <button type="button" className="ai__back" onClick={close}><span aria-hidden="true">← </span>Back to the film</button>
           </div>
           <div className="ai__printFrame" ref={print} tabIndex={-1}>
@@ -307,7 +307,7 @@ export function Ai() {
             {current.print || current.image
               // eslint-disable-next-line @next/next/no-img-element
               ? <img className="ai__printImg" src={current.print ?? current.image} alt={current.imageAlt ?? ''} />
-              : <FrameVisual kind={current.visual} className="ai__printVisual" />}
+              : current.visual && <FrameVisual kind={current.visual} className="ai__printVisual" />}
           </div>
         </div>
       )}
