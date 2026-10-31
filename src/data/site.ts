@@ -223,6 +223,8 @@ export type Frame = {
   chip?: string;
   /** the drawn output the frame shows when there is no real screen */
   visual?: 'bench' | 'phulbari' | 'tomato-vision' | 'doclipi' | 'recyclo' | 'dementiabot' | 'risk';
+  /** what kind of model it is, a few words, under the name on its card */
+  task: string;
   /** the mark bare on a transparent 512 px square, for the detection box (tools/icons/build_icons.py) */
   mark: string;
   /** the mark on a white 1200 x 1000 card, and the larger real screen the open view shows */
@@ -238,10 +240,23 @@ export const ai = {
 
 export const frames: Frame[] = [
   {
+    id: 'recyclo',
+    name: 'Recyclo',
+    date: '2025-06',
+    line: 'Tells you what kind of waste you are holding and what you could make of it.',
+    task: 'Object detection and sorting.',
+    readouts: ['Gemini', 'Next.js', 'thrift exchange', 'cleanup events'],
+    visual: 'recyclo',
+    mark: '/ai/recyclo-mark.webp',
+    image: '/ai/recyclo-icon.webp',
+    imageAlt: 'The Recyclo mark: three dark leaves turning in a circle on a green tile.',
+  },
+  {
     id: 'phulbari',
     name: 'Phulbari',
     date: '2024-05',
     line: 'Names the flower in front of the lens, one of 100 species, and waters the plant when the soil runs dry.',
+    task: 'Image classification and search.',
     readouts: ['ResNet-50 / VGG-16', '100 species', 'ESP32 irrigation', 'Firebase'],
     stat: { value: '100', label: 'flower species it can name' },
     chip: 'ICT Award 2025 · Rising Star semi-finalist',
@@ -252,22 +267,11 @@ export const frames: Frame[] = [
     print: '/ai/phulbari-print.webp',
   },
   {
-    id: 'jiffy',
-    name: 'Jiffy',
-    date: '2024',
-    line: 'A food-delivery app, redesigned: Gemini picks the meal, AR shows the menu, plus games and shorts.',
-    readouts: ['Gemini recommendations', 'ARCore menu', 'Android'],
-    chip: '2nd place · JIFFY Hackathon 2024',
-    mark: '/ai/jiffy-mark.webp',
-    image: '/ai/jiffy-icon.webp',
-    imageAlt: 'The Jiffy wordmark in orange.',
-    print: '/ai/jiffy-print.webp',
-  },
-  {
     id: 'doclipi',
     name: 'DocLipi',
     date: '2025-05',
     line: 'Sorts bank documents, reads Nepali and English, and answers questions about them in plain language.',
+    task: 'Document understanding for Nepali & English.',
     readouts: ['DenseNet121', 'Gemma 3 Vision', 'Nepali + English OCR', 'questions in plain language'],
     chip: 'JavaFX desktop · FastAPI',
     visual: 'doclipi',
@@ -277,15 +281,17 @@ export const frames: Frame[] = [
     print: '/ai/doclipi-print.webp',
   },
   {
-    id: 'recyclo',
-    name: 'Recyclo',
-    date: '2025-06',
-    line: 'Tells you what kind of waste you are holding and what you could make of it.',
-    readouts: ['Gemini', 'Next.js', 'thrift exchange', 'cleanup events'],
-    visual: 'recyclo',
-    mark: '/ai/recyclo-mark.webp',
-    image: '/ai/recyclo-icon.webp',
-    imageAlt: 'The Recyclo mark: three dark leaves turning in a circle on a green tile.',
+    id: 'jiffy',
+    name: 'Jiffy',
+    date: '2024',
+    line: 'A food-delivery app, redesigned: Gemini picks the meal, AR shows the menu, plus games and shorts.',
+    task: 'AI recommendations and ranking.',
+    readouts: ['Gemini recommendations', 'ARCore menu', 'Android'],
+    chip: '2nd place · JIFFY Hackathon 2024',
+    mark: '/ai/jiffy-mark.webp',
+    image: '/ai/jiffy-icon.webp',
+    imageAlt: 'The Jiffy wordmark in orange.',
+    print: '/ai/jiffy-print.webp',
   },
   {
     // TODO(Ashish): what OpenCollab does, when it was built, and what it runs on
@@ -293,6 +299,7 @@ export const frames: Frame[] = [
     name: 'OpenCollab',
     date: '2026',
     line: 'Details to come.',
+    task: 'Tools for AI builders.',
     readouts: [],
     mark: '/ai/opencollab-mark.webp',
     image: '/ai/opencollab-icon.webp',

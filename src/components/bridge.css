@@ -23,7 +23,8 @@
   opacity: var(--plate, 1);
 }
 .bridge .detect__mark { position: relative; }
-.bridge .detect__corners { opacity: var(--seen, 0); }
+/* the arc's cards have no detection box of their own: the hairline box stays away */
+.bridge .detect__corners { display: none; }
 /* the top card's focus corners, locked, the size AI's own focus box will be on the middle box */
 .bridge .bridge__af { right: 0; bottom: 0; transform: none; transition: none; will-change: auto; }
 

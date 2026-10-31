@@ -7,41 +7,39 @@ import { FrameVisual } from './figures/AiVisuals';
 import { Sky } from './Sky';
 import './ai.css';
 
-// Chapter 02, recognised: the AI projects stand in one row on the field the way a model sees them, each
-// mark bare inside a detection box, its class name on the box's tag and what reads it underneath. The
-// hero's apricot focus box hunts from one to the next on its own, a few seconds on each, and the words
-// at the foot follow it; the pointer or the keyboard takes it to the one they are on, and a click opens
-// it. The arch's cards come down into the boxes from Robotics (Bridge.tsx), the top one into the middle
-// box still in focus, so the focus box starts there.
+// Chapter 02, the arc: the AI projects stand on a shallow curve of frosted cards, the one in focus in
+// the middle, up front, inside the hero's apricot corners, the others falling back and turning in
+// toward it on either side. The arc turns on its own, a few seconds on each project, and the words at
+// the foot follow it; a click or the arrow keys bring a card to the middle, and a click on the middle
+// card opens it. The arch's cards come down from Robotics into the cards' icons (Bridge.tsx), the top
+// one into the middle card, so the arc starts on it.
 
 const N = frames.length;
-export const AI_MID = Math.floor((N - 1) / 2); // the box the arch's top card drops into
-const HOLD = 3400; // ms the focus rests on each project
-const LOCK = 620; // ms the focus box takes to reach a box; it locks (turns apricot) as it lands
+export const AI_MID = Math.floor((N - 1) / 2); // the card the arch's top card drops into
+const HOLD = 3800; // ms the arc rests on each project
 const two = (n: number) => String(n + 1).padStart(2, '0');
+// a card's place on the arc, from the middle: -2 … 2
+const slot = (i: number, a: number) => ((i - a + N + Math.floor(N / 2)) % N) - Math.floor(N / 2);
 
 type Mode = 'scene' | 'grid';
 
 export function Ai() {
   const section = useRef<HTMLElement>(null);
-  const scene = useRef<HTMLDivElement>(null);
-  const af = useRef<HTMLSpanElement>(null);
-  const boxes = useRef<(HTMLButtonElement | null)[]>([]);
+  const cards = useRef<(HTMLButtonElement | null)[]>([]);
   const print = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<Mode>('scene');
-  const [still, setStill] = useState(false); // reduced motion: the focus only moves when asked
+  const [still, setStill] = useState(false); // reduced motion: the arc only turns when asked
   const [active, setActive] = useState(AI_MID);
-  const [held, setHeld] = useState<number | null>(null); // under the pointer or the keyboard
+  const [held, setHeld] = useState(false); // a hand on the arc, or the keyboard in it
   const [seen, setSeen] = useState(false); // on screen
   const [bridging, setBridging] = useState(false); // the arch's cards are on their way (Bridge.tsx)
   const [open, setOpen] = useState<number | null>(null);
-  const hunt = useRef<Animation | null>(null);
-  const huntedFor = useRef(-1); // the box the focus box last went to
+  const was = useRef<number[]>(frames.map((_, i) => slot(i, AI_MID)));
   const openedFrom = useRef<HTMLButtonElement | null>(null);
   const openedAt = useRef(0);
   const closing = useRef(false);
 
-  // phones get a grid you scroll past; reduced motion keeps the row, still
+  // phones get a grid you scroll past; reduced motion keeps the arc, still
   useEffect(() => {
     const narrow = matchMedia('(max-width: 899px)');
     const calm = matchMedia('(prefers-reduced-motion: reduce)');
@@ -52,85 +50,50 @@ export function Ai() {
     return () => { narrow.removeEventListener('change', pick); calm.removeEventListener('change', pick); };
   }, []);
 
-  // on screen, and whether the arch's cards are coming down into the row
+  // on screen, and whether the arch's cards are coming down into the arc
   useEffect(() => {
     const el = section.current;
     if (!el) return;
     const io = new IntersectionObserver((entries) => setSeen(entries[entries.length - 1].isIntersecting));
     io.observe(el);
-    // while they fly, the focus waits on the middle box, where the arch's focused card lands
+    // while they fly, the arc waits on the middle card, where the arch's focused card lands
     const mo = new MutationObserver(() => {
       const on = el.dataset.bridge !== undefined;
       setBridging(on);
-      if (on) { setActive(AI_MID); setHeld(null); }
+      if (on) { setActive(AI_MID); setHeld(false); }
     });
     mo.observe(el, { attributes: true, attributeFilter: ['data-bridge'] });
     return () => { io.disconnect(); mo.disconnect(); };
   }, []);
 
-  // ------------------------------------------------------------ the focus box
-  // it hunts on its own, one box after the next, unless a hand or the keyboard holds it
+  // ------------------------------------------------------------ the arc
+  // it turns on its own, one project after the next, unless a hand or the keyboard is on it
   useEffect(() => {
-    if (mode !== 'scene' || still || !seen || bridging || open !== null || held !== null) return;
+    if (mode !== 'scene' || still || !seen || bridging || open !== null || held) return;
     const t = setTimeout(() => setActive((a) => (a + 1) % N), HOLD);
     return () => clearTimeout(t);
   }, [active, mode, still, seen, bridging, open, held]);
 
-  const place = useCallback(() => {
-    const el = af.current;
-    const box = boxes.current[active];
-    const sc = scene.current;
-    if (!el || !box || !sc) return;
-    const s = sc.getBoundingClientRect();
-    const b = box.getBoundingClientRect();
-    el.style.transform = `translate3d(${(b.left - s.left).toFixed(1)}px, ${(b.top - s.top).toFixed(1)}px, 0)`;
-    el.style.width = `${b.width.toFixed(1)}px`;
-    el.style.height = `${b.height.toFixed(1)}px`;
-  }, [active]);
-
-  // to a new box: it glides over, opening a little as it goes, overshoots, settles, and locks. Only a
-  // move hunts: while the arch's cards fly it jumps to the middle box unseen, and is locked on landing
+  // a card that goes round the back, from one end of the arc to the other, does not sweep across the
+  // middle: it jumps to its new end and fades in there
   useLayoutEffect(() => {
-    const el = af.current;
-    if (!el) return;
-    if (bridging) el.style.transition = 'none';
-    place();
-    if (bridging) { void el.offsetWidth; el.style.transition = ''; }
-    const moved = huntedFor.current !== active;
-    huntedFor.current = active;
-    if (bridging || still || !moved) { hunt.current?.cancel(); el.dataset.lock = ''; return; }
-    delete el.dataset.lock;
-    hunt.current?.cancel();
-    hunt.current = el.animate(
-      [{ scale: 1 }, { scale: 1.12, offset: 0.4 }, { scale: 0.96, offset: 0.78 }, { scale: 1 }],
-      { duration: LOCK + 420, easing: 'cubic-bezier(0.2, 0.7, 0.1, 1)' },
-    );
-    const t = setTimeout(() => { el.dataset.lock = ''; }, LOCK);
-    return () => clearTimeout(t);
-  }, [active, mode, place, bridging, still]);
-
-  // the row resizes with the screen; the box follows without gliding
-  useEffect(() => {
-    const sc = scene.current;
-    if (!sc || mode !== 'scene') return;
-    const ro = new ResizeObserver(() => {
-      const el = af.current;
-      if (!el) return;
+    const now = frames.map((_, i) => slot(i, active));
+    now.forEach((d, i) => {
+      const el = cards.current[i]?.parentElement;
+      if (!el || Math.abs(d - was.current[i]) <= 1) return;
       el.style.transition = 'none';
-      place();
-      requestAnimationFrame(() => { el.style.transition = ''; });
+      void el.offsetWidth;
+      el.style.transition = '';
+      if (!still) el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 700, easing: 'ease-out' });
     });
-    ro.observe(sc);
-    return () => ro.disconnect();
-  }, [mode, place]);
-
-  const point = (i: number) => { if (open === null) { setHeld(i); setActive(i); } };
-  const letGo = (i: number) => setHeld((h) => (h === i ? null : h));
+    was.current = now;
+  }, [active, still]);
 
   // ------------------------------------------------------------ opening a project
   const choose = (i: number) => {
     if (open !== null) return;
-    openedFrom.current = boxes.current[i];
+    if (mode === 'scene' && i !== active) { setActive(i); return; }
+    openedFrom.current = cards.current[i];
     setActive(i);
     setOpen(i);
   };
@@ -173,11 +136,13 @@ export function Ai() {
 
   const onKey = (e: KeyboardEvent<HTMLElement>) => {
     if (e.key === 'Escape' && open !== null) { e.preventDefault(); close(); return; }
-    if (open !== null || mode !== 'scene' || held === null) return;
+    if (open !== null || mode !== 'scene') return;
     const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
     if (!step) return;
     e.preventDefault();
-    boxes.current[(held + step + N) % N]?.focus();
+    const next = (active + step + N) % N;
+    setActive(next);
+    cards.current[next]?.focus({ preventScroll: true });
   };
 
   const current = frames[open ?? active];
@@ -198,37 +163,52 @@ export function Ai() {
         <p className="ai__line">{ai.line[0]} <em>{ai.line[1]}</em></p>
       </header>
 
-      <div className="ai__scene" ref={scene}>
-        <ol className="ai__row" style={{ '--n': N } as CSSProperties} aria-label="AI projects, in order">
-          {frames.map((f, i) => (
-            <li key={f.id} className="detect" data-active={mode === 'scene' && i === active ? '' : undefined} style={{ '--i': i } as CSSProperties}>
-              <button
-                type="button"
-                ref={(el) => { boxes.current[i] = el; }}
-                className="detect__box"
-                onClick={() => choose(i)}
-                onPointerEnter={(e) => { if (e.pointerType === 'mouse') point(i); }}
-                onPointerLeave={() => letGo(i)}
-                onFocus={() => point(i)}
-                onBlur={() => letGo(i)}
-                aria-label={`Open ${f.name}`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="detect__mark" src={f.mark} alt="" width={512} height={512} />
-                <span className="detect__corners" aria-hidden="true"><i /><i /><i /><i /></span>
-                <span className="detect__tag" aria-hidden="true">{f.name.toLowerCase()}</span>
-              </button>
-              {f.readouts[0] && <p className="detect__meta">{f.readouts[0]}</p>}
-              {mode === 'grid' && <p className="detect__name">{f.name}</p>}
-              {mode === 'grid' && <p className="detect__line">{f.line}</p>}
-            </li>
-          ))}
-        </ol>
-        {/* the hero's focus box, on the project in focus */}
-        {mode === 'scene' && <span className="ai__af" ref={af} aria-hidden="true"><i /><i /><i /><i /></span>}
+      <div
+        className="ai__scene"
+        onPointerEnter={(e) => { if (e.pointerType === 'mouse') setHeld(true); }}
+        onPointerLeave={() => setHeld(false)}
+        onFocus={() => setHeld(true)}
+        onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setHeld(false); }}
+      >
+        <div className="ai__arc">
+          {/* the orbit the cards ride, and the light pooled under the middle one */}
+          <svg className="ai__orbit" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true">
+            <ellipse cx="500" cy="150" rx="498" ry="148" />
+            <ellipse className="ai__orbitIn" cx="500" cy="150" rx="330" ry="96" />
+          </svg>
+          <span className="ai__pool" aria-hidden="true" />
+          <ol className="ai__cards" aria-label="AI projects, in order">
+            {frames.map((f, i) => {
+              const d = slot(i, active);
+              const mid = mode === 'scene' && d === 0;
+              return (
+                <li key={f.id} className="acard" data-mid={mid ? '' : undefined} style={{ '--d': d, '--ad': Math.abs(d), '--i': i } as CSSProperties}>
+                  <button
+                    type="button"
+                    ref={(el) => { cards.current[i] = el; }}
+                    className="acard__plate"
+                    onClick={() => choose(i)}
+                    aria-label={mid || mode === 'grid' ? `Open ${f.name}` : `Bring ${f.name} to the middle`}
+                    aria-current={mid ? 'true' : undefined}
+                  >
+                    {/* the arch's cards land on these (Bridge.tsx) */}
+                    <span className="detect__box acard__icon">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img className="detect__mark" src={f.mark} alt="" width={512} height={512} />
+                    </span>
+                    <span className="acard__name">{f.name}</span>
+                    <span className="acard__task">{f.task}</span>
+                    <span className="acard__af" aria-hidden="true"><i /><i /><i /><i /></span>
+                  </button>
+                  {mode === 'grid' && <p className="acard__line">{f.line}</p>}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
       </div>
 
-      {/* the project in focus, from the left margin */}
+      {/* the project in focus, under the middle card */}
       {mode === 'scene' && (
         <div className="ai__foot">
           <div className="ai__cap" aria-live="polite">
