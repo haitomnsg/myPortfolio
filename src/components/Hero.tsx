@@ -17,7 +17,10 @@ export function Hero() {
       {/* the viewfinder is the camera's own readout, so it stays out of the accessibility tree */}
       <div className="vf intro-fade" aria-hidden="true" style={d(0.6)}>
         <span className="vf__c vf__c--tl">{HUD.mode}</span>
-        <span className="vf__c vf__c--tr"><span data-focus-readout>{focusOf(REST)}</span>%</span>
+        <span className="vf__c vf__c--tr">
+          <span data-focus-meter><span data-focus-readout>{focusOf(REST)}</span>%</span>
+          <span data-focus-locked hidden>{HUD.locked}</span>
+        </span>
         <span className="vf__c vf__c--bl">{HUD.shutter} · {HUD.aperture}</span>
         <span className="vf__c vf__c--br">{HUD.iso}</span>
       </div>
@@ -33,6 +36,15 @@ export function Hero() {
           <span className="sr-only">, {site.role}</span>
         </h1>
       </div>
+
+      {/* shown by src/motion/focus.ts once the canvas is live; it does nothing without JS */}
+      <button className="unfocus" type="button" data-unfocus hidden>
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4" />
+          <path className="unfocus__smear" d="M4 8h8" />
+        </svg>
+        <span data-unfocus-label>Unfocus</span>
+      </button>
     </section>
   );
 }

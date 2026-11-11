@@ -312,6 +312,21 @@ html:not(.js) .af__lens { display: none; }
 .motion .af__frame { animation: af-hunt 1.5s cubic-bezier(0.2, 0.7, 0.1, 1) 0.35s both, af-lock 0.2s steps(1) 1.85s both; }
 .motion .af::before, .motion .af::after { animation: intro-fade 1.2s var(--out) 0.7s both; }
 
+/* Unfocus (src/motion/focus.ts): a still photo of the same shot, face sharp and edges dragged
+   sideways (public/hero/unfocus.webp). It replaces the blur canvas as JS crossfades the two. */
+.focus__sharp {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  opacity: 0;
+}
+html:not(.js) .focus__sharp { display: none; }
+/* the photo is the focus now: the AF box fades away and lets go of the pointer */
+.af { transition: opacity 0.5s var(--out); }
+.focus.is-unfocused .af { opacity: 0; }
+
 /* the viewfinder: four corner brackets and the camera's numbers */
 .vf {
   position: absolute;
@@ -346,6 +361,34 @@ html:not(.js) .af__lens { display: none; }
 }
 .name .line { padding-bottom: 0.22em; margin-bottom: -0.22em; } /* the reveal mask clears the p's descender */
 
+/* the Unfocus button: the header's frosted glass, on the right margin line */
+.unfocus {
+  position: absolute;
+  z-index: 4;
+  right: var(--margin);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px 13px 17px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(245 248 251 / 0.34);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--c-ink);
+  font: 500 14px / 1 var(--f-body);
+  cursor: pointer;
+  transition: background 0.3s var(--out), color 0.3s var(--out), box-shadow 0.3s var(--out);
+  animation: intro-fade 0.8s var(--out) both;
+}
+.unfocus[hidden] { display: none; }
+.unfocus svg { fill: none; stroke: currentColor; stroke-width: 1.5; overflow: visible; }
+.unfocus__smear { stroke: var(--c-signal); stroke-linecap: round; transition: d 0.4s var(--out); }
+.unfocus.is-on .unfocus__smear { d: path('M7 8h2'); }
+.unfocus:hover, .unfocus.is-on { background: var(--c-paper); box-shadow: 0 6px 18px -8px rgb(18 26 38 / 0.35); }
+.unfocus:focus-visible { outline: 2px solid var(--c-ink); outline-offset: 3px; }
+
 /* ---------- phone and portrait: the face in the frame, the name under it ---------- */
 .focus { height: 98svh; top: 9.5svh; left: calc(50vw - var(--fx) * 98svh * 1024 / 1536); }
 /* the brackets stand on the same margin line as the logo and the type */
@@ -355,6 +398,8 @@ html:not(.js) .af__lens { display: none; }
 .name { font-size: 23vw; }
 /* the lower corners land on the shoulders here */
 .vf__c--bl, .vf__c--br { color: var(--c-paper); }
+/* under the lower right bracket, clear of the name */
+.unfocus { top: calc(50svh + 20px); }
 
 /* ---------- landscape: one poster ---------- */
 @media (min-aspect-ratio: 5/4) {
@@ -374,6 +419,8 @@ html:not(.js) .af__lens { display: none; }
   .vf__c--tl, .vf__c--tr { color: var(--c-sky-deep); }
   .vf__c--bl, .vf__c--br { color: var(--c-sky-ink); }
   .name { font-size: calc(var(--s) * 12.5); }
+  /* bottom right, sitting on the name's baseline */
+  .unfocus { top: auto; bottom: calc(var(--s) * 3 + var(--s) * 12.5 * 0.2); }
 }
 
 /* ============================================================

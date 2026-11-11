@@ -1,5 +1,10 @@
 """Hero v2 assets from the ChatGPT studio portrait (docs/HERO_ASSET_PROMPT.md, "Hero v2b").
 usage: python -I build_hero_v2.py <ashish-hero-v2b.png> <out_dir>
+       python -I build_hero_v2.py <focusNew.png> <out_dir> --still unfocus.webp [dy]
+
+--still keys one more photo of the same shoot (same canvas, same backdrop) and writes only that file:
+the Unfocus still (docs/UNFOCUS_PROMPT.md), whose sideways motion trail becomes soft transparency.
+dy moves the still down that many px first, to register its face with the portrait's (focusNew.png: 2).
 
 portrait.webp     the photo cut out of its flat blue backdrop, full size (AF box, footer)
 silhouette.webp   the same canvas at a third of the size (first paint, and the blurred canvas source)
@@ -13,10 +18,14 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 src, out = sys.argv[1], sys.argv[2]
+still = sys.argv[4] if len(sys.argv) > 4 and sys.argv[3] == "--still" else None
+dy = int(sys.argv[5]) if still and len(sys.argv) > 5 else 0
 os.makedirs(out, exist_ok=True)
 
 C = np.asarray(Image.open(src).convert("RGB"), np.float32)
 H, W, _ = C.shape  # 1536 x 1024
+if dy:  # the top rows are backdrop, so the gap is filled by repeating the first row
+    C = np.concatenate([np.repeat(C[:1], dy, 0), C[:-dy]]) if dy > 0 else np.concatenate([C[-dy:], np.repeat(C[-1:], -dy, 0)])
 
 border = np.concatenate([C[:60].reshape(-1, 3), C[:700, :40].reshape(-1, 3), C[:700, -40:].reshape(-1, 3)])
 B = border.mean(0)
@@ -63,6 +72,28 @@ def save(rgb, alpha, name, size=None):
     im.save(os.path.join(out, name), "WEBP", quality=88, method=6)
     return im.size
 
+
+if still:
+    # A motion trail is the dark hoodie and hair smeared over the backdrop: every trail pixel lies on the
+    # line from the backdrop to that dark, so its alpha is how far along it sits, and its colour is the dark.
+    # (The colour key above calls half-blue trail pixels solid and leaves a pale halo.) Lit fabric sits a
+    # little short of the dark, so alpha reaches 1 at FULL of the way. Skin is off that line: kept solid.
+    D = np.array([20, 24, 32], np.float32)
+    FULL = 0.78
+    v = D - B
+    t = np.clip(((C - B) * v).sum(-1) / (v * v).sum(), 0, 1)
+    sa = np.clip(t / FULL, 0, 1)
+    skin = Image.fromarray(np.where(C[..., 0] > C[..., 2] + 12, 255, 0).astype(np.uint8)).filter(ImageFilter.MinFilter(3))
+    skin = np.asarray(skin, np.float32) / 255
+    sa = np.where(d < 14, 0, np.maximum(sa, skin))
+    sa[holes] = 0.07
+    ae = np.maximum(sa, 0.08)[..., None]
+    Fs = np.clip((C - (1 - ae) * B) / ae, 0, 255)
+    trail = ((sa < 0.995) & (skin < 0.5) & ~holes)[..., None]
+    Fs = np.where(trail, np.minimum(Fs, D + 30), Fs)  # what survives the unmix there is backdrop: keep it dark
+    Fs = np.where(holes[..., None], 236, Fs)
+    print(still, save(Fs, sa, still))
+    sys.exit()
 
 save(F, a, "portrait.webp")
 small = save(F, a, "silhouette.webp", (W // 3, H // 3))

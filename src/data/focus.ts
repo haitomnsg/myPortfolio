@@ -9,4 +9,4 @@ export const PORTRAIT = { w: 1024, h: 1536, small: { w: 341, h: 512 } };
 export const FACE = { x: 0.5459, y: 0.28, w: 0.3046, h: 0.1315 };
 
 /** The viewfinder's numbers are real: 88% field ripeness, 256 reward, the 2026 paper. */
-export const HUD = { mode: 'AF-C', shutter: '1/88', aperture: 'f/2.56', iso: 'ISO 2026' };
+export const HUD = { mode: 'AF-C', shutter: '1/88', aperture: 'f/2.56', iso: 'ISO 2026', locked: 'FOCUS LOCKED' };

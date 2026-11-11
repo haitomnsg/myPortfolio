@@ -5,7 +5,8 @@ import { FACE, PORTRAIT } from '@/data/focus';
  * The subject, out of focus. A canvas redraws the portrait at the driver's blur, smeared sideways
  * like a slow shutter (src/motion/focus.ts); the <img> is the no-JS and first-paint version. The AF
  * box rests on the face; under a mouse it follows the pointer and shows the portrait sharp inside
- * it, cut from the same canvas so it lines up with the blur under it.
+ * it, cut from the same canvas so it lines up with the blur under it. The hero's Unfocus button
+ * swaps that for a still photo: the face sharp, the edges dragged sideways.
  */
 export function Focus({ blur = 40, af = true }: { blur?: number; af?: boolean }) {
   const vars = { '--blur': `${blur}px`, '--fx': FACE.x, '--fy': FACE.y, '--fw': FACE.w, '--fh': FACE.h } as CSSProperties;
@@ -15,6 +16,11 @@ export function Focus({ blur = 40, af = true }: { blur?: number; af?: boolean })
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="focus__img" data-silhouette src="/hero/silhouette.webp" alt="" width={PORTRAIT.small.w} height={PORTRAIT.small.h} fetchPriority="high" />
         <canvas className="focus__canvas" data-focus-canvas />
+        {/* Unfocus: one still photo, face sharp and the edges dragged sideways (docs/UNFOCUS_PROMPT.md) */}
+        {af && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="focus__sharp" data-focus-sharp src="/hero/unfocus.webp" alt="" width={PORTRAIT.w} height={PORTRAIT.h} loading="lazy" />
+        )}
       </div>
       {af && (
         <>

@@ -2,7 +2,8 @@
 // viewfinder's focus readout both read it. The autofocus hunt is a CSS animation on the <img> (it
 // starts at first paint); this module reads it while it runs, then hands over to a canvas that
 // smears the subject sideways like a slow shutter and lets scroll pull focus. The AF box rests on
-// the face; under a mouse it follows the pointer and shows the portrait sharp inside it.
+// the face; under a mouse it follows the pointer and shows the portrait sharp inside it. The hero's
+// Unfocus button crossfades to a still photo: face sharp, edges dragged sideways.
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { onPage, prefersReducedMotion } from '@/engine';
@@ -15,6 +16,9 @@ const SCROLL_SHARPEN = 16; // px of blur taken away across the hero's scroll
 const SMEAR = 2.4; // sideways shake, CSS px each way per px of blur
 const GHOSTS = 9; // copies across the shake: few enough to leave a slow shutter's doubled edges
 const SOFT = 0.3; // the gaussian laid over the shake, per px of blur
+// Unfocus (the hero's button): the still photo (public/hero/unfocus.webp) fades in while the blur
+// under it tightens to this share and fades out, so it reads as pulling focus, not a dissolve.
+const UNFOCUS = { blur: 12, tighten: 0.35, ease: 1.1 }; // blur px for the readout; share; s
 
 export function startFocus() {
   onPage(() => {
@@ -28,10 +32,18 @@ export function startFocus() {
     const afImg = stage.querySelector<HTMLImageElement>('[data-af-img]');
     const hero = stage.closest<HTMLElement>('section') ?? stage;
     const readout = hero.querySelector<HTMLElement>('[data-focus-readout]');
+    const meter = hero.querySelector<HTMLElement>('[data-focus-meter]');
+    const locked = hero.querySelector<HTMLElement>('[data-focus-locked]');
+    const sharp = stage.querySelector<HTMLImageElement>('[data-focus-sharp]');
+    const button = hero.querySelector<HTMLButtonElement>('[data-unfocus]');
+    const label = button?.querySelector<HTMLElement>('[data-unfocus-label]');
 
     const reduced = prefersReducedMotion();
     const rest = Number(stage.dataset.blur || 40);
     const s = { scroll: 0 };
+    // 0 = the AF box over a blur, 1 = unfocused: the still photo, no AF box
+    const mode = { u: 0, on: false };
+    let shownU = -1;
     // the AF box's centre, stage px; it rests on the face
     const box = { x: 0, y: 0, tx: 0, ty: 0, on: false, placed: false };
     let w = 0, h = 0, drawn = -1, shown = -1, ready = false;
@@ -101,18 +113,27 @@ export function startFocus() {
     };
 
     const tick = () => {
-      const blur = ready ? Math.max(0, rest - s.scroll * SCROLL_SHARPEN) : cssBlur();
-      if (ready && Math.abs(blur - drawn) > 1) draw(blur); // 1px steps are invisible at this blur
-      const f = focusOf(blur);
+      const base = ready ? Math.max(0, rest - s.scroll * SCROLL_SHARPEN) : cssBlur();
+      const u = mode.u;
+      // unfocused, the blur tightens as it fades out under the still
+      const want = base * (1 - (1 - UNFOCUS.tighten) * u);
+      if (ready && Math.abs(want - drawn) > 1) draw(want); // 1px steps are invisible at this blur
+      if (Math.abs(u - shownU) > 0.001) {
+        if (sharp) sharp.style.opacity = String(u);
+        canvas.style.opacity = u > 0 ? String(1 - u) : ''; // '' hands it back to the stylesheet
+        shownU = u;
+      }
+      const f = focusOf(base + (UNFOCUS.blur - base) * u);
       if (readout && f !== shown) { readout.textContent = String(f); shown = f; }
       // the subject leans away from the pointer a little; the sharp copy in the AF box leans with it
-      const lean = reduced ? 0 : idle.x * -14;
+      const lean = reduced ? 0 : idle.x * -14 * (1 - u); // unfocused, the still photo holds still
       if (!reduced) gsap.set(drift, { x: lean });
       if (af && w) {
-        // at rest the AF point hunts over the face, a few px either way
-        const hx = reduced || box.on ? 0 : Math.sin(idle.t * 0.9) * 5 + Math.sin(idle.t * 2.3) * 2;
-        const hy = reduced || box.on ? 0 : Math.cos(idle.t * 0.7) * 3;
-        const tx = (box.on ? box.tx : FACE.x * w + idle.x * -14) + hx;
+        // at rest the AF point hunts over the face, a few px either way; unfocused, it holds still
+        const still = reduced || box.on || mode.on;
+        const hx = still ? 0 : Math.sin(idle.t * 0.9) * 5 + Math.sin(idle.t * 2.3) * 2;
+        const hy = still ? 0 : Math.cos(idle.t * 0.7) * 3;
+        const tx = (box.on ? box.tx : FACE.x * w + lean) + hx;
         const ty = (box.on ? box.ty : FACE.y * h) + hy;
         const k = reduced || !box.placed ? 1 : 1 - Math.pow(0.84, gsap.ticker.deltaRatio());
         box.x += (tx - box.x) * k;
@@ -134,7 +155,24 @@ export function startFocus() {
       compose();
       draw(rest);
       stage.classList.add('is-live');
+      if (button) button.hidden = false;
     };
+
+    // The Unfocus button: the AF box fades out and lets go of the pointer, the still photo comes in
+    // (face sharp, edges dragged sideways). Pressed again, it all goes back.
+    const setUnfocus = (on: boolean) => {
+      mode.on = on;
+      canvas.style.transition = 'none'; // the tick drives its opacity now; a CSS transition would lag it
+      stage.classList.toggle('is-unfocused', on);
+      button?.classList.toggle('is-on', on);
+      if (label) label.textContent = on ? 'Focus' : 'Unfocus';
+      if (meter) meter.hidden = on;
+      if (locked) locked.hidden = !on;
+      if (on) { box.on = false; af?.classList.remove('is-on'); }
+      gsap.to(mode, { u: on ? 1 : 0, duration: reduced ? 0 : UNFOCUS.ease, ease: on ? 'power3.out' : 'power2.inOut', overwrite: true });
+    };
+    const onPress = () => setUnfocus(!mode.on);
+    button?.addEventListener('click', onPress);
     size();
     if (img.complete && img.naturalWidth) start();
     else img.addEventListener('load', start, { once: true });
@@ -143,7 +181,7 @@ export function startFocus() {
 
     // Pointer: the AF box follows a mouse over the hero and returns to the face when it leaves.
     const onMove = (e: PointerEvent) => {
-      if (e.pointerType !== 'mouse' || !w || !af) return;
+      if (e.pointerType !== 'mouse' || !w || !af || mode.on) return;
       const r = stage.getBoundingClientRect(); // the box lives in the stage, not the leaning drift
       const hw = af.offsetWidth / 2, hh = af.offsetHeight / 2;
       box.tx = gsap.utils.clamp(hw, w - hw, e.clientX - r.left);
@@ -172,6 +210,8 @@ export function startFocus() {
       run(false);
       ro.disconnect();
       img.removeEventListener('load', start);
+      button?.removeEventListener('click', onPress);
+      gsap.killTweensOf(mode);
       hero.removeEventListener('pointermove', onMove);
       hero.removeEventListener('pointerleave', onLeave);
     };

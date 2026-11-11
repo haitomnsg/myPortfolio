@@ -623,6 +623,28 @@ the film reel (6i); he then asked for a new AI layout instead of the reel, with 
   flight needs the arch (wide, motion) and starts only from rest at either end, never halfway.
 - **Retired.** The film reel (6i): holes, strip and running film. Its sky, heading and open view stay.
 
+## 6l. Hero: the Unfocus button (2026-11-10)
+
+From Ashish's mockup (sharp face, edges smeared sideways, "FOCUS LOCKED"). The hero still loads as before:
+heavy blur, AF box hunting on the face and following a mouse. A frosted **Unfocus** pill (the header's glass) sits
+on the right margin line: bottom right on the name's baseline in landscape, under the ISO bracket on phones. It
+appears only once the canvas is live, and does nothing without JS.
+
+- **Pressed:** over 1.1 s a still photo fades in (`public/hero/unfocus.webp`: face sharp, hair and shoulders dragged
+  sideways) while the blur canvas under it tightens to 35% and fades out, so it reads as pulling focus. Then nothing
+  moves: the pointer lean eases to zero too (`UNFOCUS` in `src/motion/focus.ts`).
+- **The still** is Ashish's ChatGPT edit of the hero photo (`docs/UNFOCUS_PROMPT.md`), saved as
+  `currentWebsiteAssets/focusNew.png` (2026-11-11; it replaced the first take, `focus.png`). Same 1024×1536 canvas and
+  backdrop as `ashish-hero-v2b.png`; it sat 2 px high at the face, so it is moved down 2 px and is otherwise used
+  as is. Keyed by `build_hero_v2.py currentWebsiteAssets/focusNew.png public/hero --still unfocus.webp 2`, which mattes
+  trails as dark-over-blue (alpha = how far a pixel sits from the backdrop toward the hoodie's dark), because the
+  portrait's colour key reads half-blue trail pixels as solid and leaves a pale halo.
+- History: a first pass drew the smear in code with jiggling edges. Ashish found it not minimal and asked for one
+  still photo instead.
+- The AF box fades out and stops following the pointer (Ashish wants no frame on the focused photo); the lens
+  rings and the four viewfinder brackets stay. The top-right readout says FOCUS LOCKED. The button turns paper and reads **Focus**; pressed again, it all eases back.
+- Reduced motion: the same look, no ease.
+
 ## 7. Open questions for Ashish
 
 1. Hero line: "I build robots that see, and software people use." Alternatives: "Robots that
